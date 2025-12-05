@@ -7,21 +7,16 @@ from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, BufferedInputFile
-# Импортируем библиотеку Google
-from google import genai
-from google.genai import types as genai_types
 
-# Импорт конфигурации и текстов
+# Импорты проекта
 import config
 import text_content as tc
+import ai_service  # <--- Подключаем модуль генерации
 
 # --- SETUP ---
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=config.BOT_TOKEN)
 dp = Dispatcher()
-
-# Инициализация клиента GenAI
-client = genai.Client(api_key=config.GOOGLE_API_KEY)
 
 # --- DATABASE ---
 async def init_db():
@@ -138,10 +133,9 @@ async def audience_chosen(message: types.Message, state: FSMContext):
         await message.answer("Please choose from the buttons.")
         return
     data = await state.get_data()
-    country = data['country']
     
     # Tips
-    tip_text = tc.get_tips(country, code)
+    tip_text = tc.get_tips(data['country'], code)
     await message.answer(tip_text, parse_mode="Markdown")
     
     await state.update_data(audience=code)
@@ -196,27 +190,12 @@ async def confirm_generation(message: types.Message, state: FSMContext):
         
         final_prompt = tc.build_final_prompt(data['country'], data['audience'], data['topic'])
         
-        try:
-            # --- GOOGLE GENAI CALL (LIBRARY) ---
-            # Правильный вызов (plural) и без лишнего декодирования
-            
-            response = client.models.generate_images(
-                model='imagen-3.0-generate-001',
-                prompt=final_prompt,
-                config=genai_types.GenerateImagesConfig(
-                    number_of_images=1,
-                    aspect_ratio="1:1",
-                    safety_filter_level="block_medium_and_above",
-                    person_generation="allow_adult"
-                )
-            )
-            
-            # ВАЖНО: Библиотека сама декодирует base64 в байты.
-            # Мы просто берем готовые байты.
-            image_bytes = response.generated_images[0].image.image_bytes
-            
-            # Отправка в телеграм
-            input_file = BufferedInputFile(image_bytes, filename="greeting_card.png")
+        # Вызов функции из нового файла ai_service
+        image_io = await ai_service.generate_image_bytes(final_prompt)
+        
+        if image_io:
+            file_bytes = image_io.getvalue()
+            input_file = BufferedInputFile(file_bytes, filename="greeting_card.jpg")
             
             caption = (
                 f"Here is your card for {tc.COUNTRIES[data['country']]}!\n"
@@ -227,10 +206,8 @@ async def confirm_generation(message: types.Message, state: FSMContext):
             await bot.send_photo(chat_id=message.chat.id, photo=input_file, caption=caption)
             await waiting_msg.delete()
             await state.clear()
-            
-        except Exception as e:
-            logging.error(f"Generate Error: {e}")
-            await waiting_msg.edit_text("⚠️ Something went wrong with the AI service. Please try again later.")
+        else:
+            await waiting_msg.edit_text("⚠️ Google AI API Error or Policy Block. Please try again or check logs.")
             await state.clear()
 
 async def main():
