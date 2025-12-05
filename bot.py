@@ -24,15 +24,15 @@ client = genai.Client(api_key=config.GOOGLE_API_KEY)
 
 # --- DATABASE ---
 async def init_db():
-    async with aiosqlite.connect(config.DB_NAME) asdb:
-        await asdb.execute("""
+    async with aiosqlite.connect(config.DB_NAME) as db:
+        await db.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 user_id INTEGER PRIMARY KEY,
                 username TEXT,
                 joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
-        await asdb.commit()
+        await db.commit()
 
 async def add_user(user_id: int, username: str):
     async with aiosqlite.connect(config.DB_NAME) as db:
