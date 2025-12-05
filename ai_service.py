@@ -13,7 +13,7 @@ load_dotenv()
 
 # --- КОНФИГУРАЦИЯ ---
 API_KEY = os.getenv("GOOGLE_API_KEY")
-MODEL_NAME = "gemini-2.5-flash-image"  # Твоя модель
+MODEL_NAME = "gemini-2.5-flash-image" 
 
 # Инициализация клиента
 if API_KEY:
@@ -59,7 +59,8 @@ async def generate_image_bytes(positive_prompt: str) -> BytesIO:
             config=types.GenerateContentConfig(
                 response_modalities=["IMAGE"],
                 safety_settings=SAFETY_SETTINGS,
-                image_config=types.ImageConfig(aspect_ratio="1:1", number_of_images=1)
+                # ИСПРАВЛЕНИЕ: Убрали number_of_images=1, так как Pydantic ругается
+                image_config=types.ImageConfig(aspect_ratio="1:1")
             )
         )
 
