@@ -7,7 +7,8 @@ from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, BufferedInputFile
-from google import genai 
+# Импортируем библиотеку Google
+from google import genai
 from google.genai import types as genai_types
 
 # Импорт конфигурации и текстов
@@ -19,7 +20,7 @@ logging.basicConfig(level=logging.INFO)
 bot = Bot(token=config.BOT_TOKEN)
 dp = Dispatcher()
 
-# Инициализация клиента GenAI (Новая библиотека)
+# Инициализация клиента GenAI
 client = genai.Client(api_key=config.GOOGLE_API_KEY)
 
 # --- DATABASE ---
@@ -57,7 +58,6 @@ class CardGen(StatesGroup):
 # --- KEYBOARDS ---
 def make_kb(items: dict, cols=2):
     buttons = [KeyboardButton(text=val) for val in items.values()]
-    # Разбивка на колонки
     grid = [buttons[i:i + cols] for i in range(0, len(buttons), cols)]
     return ReplyKeyboardMarkup(keyboard=grid, resize_keyboard=True, one_time_keyboard=True)
 
@@ -79,12 +79,10 @@ async def cmd_stats(message: types.Message):
 async def cmd_broadcast(message: types.Message):
     if message.from_user.id != config.ADMIN_ID:
         return
-    
     parts = message.text.split(maxsplit=1)
     if len(parts) < 2:
         await message.answer("Usage: /broadcast <message>")
         return
-
     text = parts[1]
     users = await get_all_users()
     count = 0
@@ -92,9 +90,9 @@ async def cmd_broadcast(message: types.Message):
         try:
             await bot.send_message(uid, text)
             count += 1
-            await asyncio.sleep(0.05) # Rate limit safety
+            await asyncio.sleep(0.05)
         except Exception:
-            pass # User blocked bot
+            pass
     await message.answer(f"✅ Broadcast sent to {count} users.")
 
 # --- HANDLERS: FLOW ---
@@ -103,7 +101,6 @@ async def cmd_broadcast(message: types.Message):
 async def cmd_start(message: types.Message, state: FSMContext):
     await state.clear()
     await add_user(message.from_user.id, message.from_user.username)
-    
     welcome_text = (
         "Hello! I'll help you congratulate your international colleagues, "
         "partners and friends in GCC with respect to their culture and traditions, "
@@ -127,7 +124,6 @@ async def country_chosen(message: types.Message, state: FSMContext):
     if not code:
         await message.answer("Please choose from the buttons.")
         return
-    
     await state.update_data(country=code)
     await state.set_state(CardGen.choosing_audience)
     await message.answer(
@@ -141,19 +137,15 @@ async def audience_chosen(message: types.Message, state: FSMContext):
     if not code:
         await message.answer("Please choose from the buttons.")
         return
-    
     data = await state.get_data()
     country = data['country']
     
-    # 1. Показать TIPS
+    # Tips
     tip_text = tc.get_tips(country, code)
     await message.answer(tip_text, parse_mode="Markdown")
     
-    # 2. Предложить Topics (с фильтрацией)
     await state.update_data(audience=code)
-    
     avail_topics_keys = tc.get_available_topics(code)
-    # Формируем словарь для клавиатуры на основе ключей
     topic_buttons = {k: tc.TOPICS[k]["btn"] for k in avail_topics_keys}
     
     await state.set_state(CardGen.choosing_topic)
@@ -164,29 +156,23 @@ async def audience_chosen(message: types.Message, state: FSMContext):
 
 @dp.message(CardGen.choosing_topic)
 async def topic_chosen(message: types.Message, state: FSMContext):
-    # Найти ключ топика по тексту кнопки
     topic_code = None
     for k, v in tc.TOPICS.items():
         if v["btn"] == message.text:
             topic_code = k
             break
-            
     if not topic_code:
         await message.answer("Please choose a valid topic.")
         return
 
     await state.update_data(topic=topic_code)
-    
-    # Показать описание топика
     desc = tc.TOPICS[topic_code]["desc"]
-    
     kb = ReplyKeyboardMarkup(
         keyboard=[
             [KeyboardButton(text="✅ Generate Card!")],
             [KeyboardButton(text="⬅️ Back to Topics")]
         ], resize_keyboard=True
     )
-    
     await state.set_state(CardGen.confirming_topic)
     await message.answer(
         f"**Theme Selected:** {message.text}\n\n{desc}\n\nReady to create art?",
@@ -206,29 +192,27 @@ async def confirm_generation(message: types.Message, state: FSMContext):
 
     if message.text == "✅ Generate Card!":
         data = await state.get_data()
-        
         waiting_msg = await message.answer("🎨 Mixing culture and AI art... Please wait...")
         
-        # Сборка промпта
         final_prompt = tc.build_final_prompt(data['country'], data['audience'], data['topic'])
         
         try:
-            # --- GOOGLE GENAI CALL ---
-            # Используем новую библиотеку google-genai
-            # Она автоматически возвращает объект с байтами изображения
-            response = client.models.generate_image(
+            # --- GOOGLE GENAI CALL (LIBRARY) ---
+            # Правильный вызов (plural) и без лишнего декодирования
+            
+            response = client.models.generate_images(
                 model='imagen-3.0-generate-001',
                 prompt=final_prompt,
-                config=genai_types.GenerateImageConfig(
-                    aspect_ratio="1:1",
+                config=genai_types.GenerateImagesConfig(
                     number_of_images=1,
+                    aspect_ratio="1:1",
                     safety_filter_level="block_medium_and_above",
-                    person_generation="allow_adult" # Но промпт запрещает женщин
+                    person_generation="allow_adult"
                 )
             )
             
-            # В новой библиотеке response.generated_images[0].image.image_bytes
-            # содержит сырые байты, декодировать base64 вручную не нужно, библиотека делает это сама.
+            # ВАЖНО: Библиотека сама декодирует base64 в байты.
+            # Мы просто берем готовые байты.
             image_bytes = response.generated_images[0].image.image_bytes
             
             # Отправка в телеграм
@@ -245,7 +229,7 @@ async def confirm_generation(message: types.Message, state: FSMContext):
             await state.clear()
             
         except Exception as e:
-            logging.error(f"Error generating image: {e}")
+            logging.error(f"Generate Error: {e}")
             await waiting_msg.edit_text("⚠️ Something went wrong with the AI service. Please try again later.")
             await state.clear()
 
