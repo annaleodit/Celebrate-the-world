@@ -65,7 +65,7 @@ The year "2026" is in buttom part of the card in a sophisticated serif or script
 """
     },
     "fireworks": {
-        "btn": "🎆 Fireworks arabesque",
+        "btn": "🎆 Firebesque",
         "desc": "Clean, expensive, and structurally precise geometric fireworks. Best for: Mixed Groups & Locals.",
         "prompt": """
 Role
@@ -101,7 +101,7 @@ Color Palette: Rich and deep. Dominant colors are deep indigo/navy blue and warm
 Texture & Scale: Emphasize the tactile nature of sand ripples and the vast, majestic scale of the dunes. The images must feel expensive and immersive.
 Fidelity: Photorealistic magic realism. Not a cartoon.
 Scene Description
-A perspective looking up a sand dune at deep night. Other dunes and sands in the distance, sideways. At the very peak of the dune, a single large kashta tent glows intensely with warm welcoming light and is decorated with christmas-tree-like lights.
+A perspective looking slightly up a sand dune at deep night. Other dunes and sands in the distance, sideways. At the very peak of the dune, a single large kashta tent glows intensely with warm welcoming light and is decorated with christmas-tree-like lights.
 Above the tent, the deep night sky is filled with stars or FULL moon that form a swirling, galaxy-like spiral pattern. The way up the dune slope towards the tent is shown with small warm lights.
 """
     },
