@@ -116,7 +116,7 @@ Color Palette: Rich and deep. Dominant colors are deep indigo/navy blue and warm
 Texture & Scale: Emphasize the tactile nature of sand ripples and the vast, majestic scale of the dunes. The images must feel expensive and immersive.
 Fidelity: Photorealistic magic realism. Not a cartoon.
 Scene Description
-Terrace of a villa in one of the GCC countries with a rich garden in front, but overlooking a desert. The view is from inside the house or from terrace entrance. This is an expatriate home, so it is decorated for Christmas and the Christmas tree is on the terrace. Also sofa, pillows. The terrace is warm and cozy, decorated in European style. Warm light, a lot of bokeh, Christmas setting. STRICTLY NO RAMADAN FANOUS. Magical, shimmering particles resembling snow or stardust are falling from the starry skies on the terrace. “SEASONAL GREETINGS 2026” is rendered in elegant lightweight fonts, slight glow as a separate layer over the image, not part of it. Modestly in a corner without overlapping key elements of the picture.
+Terrace of a villa in one of the GCC countries with a rich garden in front, but overlooking a desert. The view is from inside the house or from terrace entrance. This is an expatriate home, so it is decorated for Christmas and the Christmas tree is on the terrace. Also sofa, pillows. The terrace is warm and cozy, decorated in European style. Warm light, a lot of bokeh, Christmas setting. STRICTLY NO RAMADAN FANOUS. Magical, shimmering particles resembling snow or stardust are falling from the starry skies on the terrace.
 """
     },
     "parol": {
