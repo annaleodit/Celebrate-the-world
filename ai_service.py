@@ -18,18 +18,27 @@ MODEL_NAME = "gemini-2.5-flash-image"
 # Конфигурация Canvas
 CANVAS_SIZE = (1080, 1920)
 IMAGE_SIZE = (1080, 1080)
+
+# Файл шрифта (должен лежать в корне и быть в GitHub!)
 FONT_PATH = "CinzelDecorative-Regular.ttf"
 
-# Настройки текста
-MAX_FONT_SIZE = 180    # УВЕЛИЧИЛИ: Начинаем с очень крупного
-MIN_FONT_SIZE = 50     # Меньше этого будет нечитабельно
-TEXT_COLOR = (212, 175, 55) # Золото (Cinzel Gold)
+# --- НОВЫЕ ЦВЕТА И РАЗМЕРЫ ---
+MAX_FONT_SIZE = 160    
+MIN_FONT_SIZE = 50     
+
+# Текст: #4A3520 (Темно-коричневый)
+TEXT_COLOR = (74, 53, 32) 
+
+# Рамка: #E5C585 (Светлое золото)
+FRAME_COLOR = (229, 197, 133)
+
 BG_COLOR = (255, 255, 255)
-FRAME_WIDTH = 20       # Рамка чуть жирнее
+FRAME_WIDTH = 10       # Сделали в 2 раза тоньше (было 20)
+# -----------------------------
 
 # Область для текста
-TEXT_START_Y = 1150       # Чуть выше
-TEXT_MAX_WIDTH = 950      # Шире область
+TEXT_START_Y = 1150       
+TEXT_MAX_WIDTH = 950      
 TEXT_MAX_HEIGHT = 700     
 
 # Инициализация клиента
@@ -84,7 +93,6 @@ def wrap_text(text, font, max_width, draw_obj):
     current_line = words[0]
     for word in words[1:]:
         test_line = current_line + " " + word
-        # Используем textbbox для точного измерения
         bbox = draw_obj.textbbox((0, 0), test_line, font=font)
         width = bbox[2] - bbox[0]
         
@@ -97,21 +105,12 @@ def wrap_text(text, font, max_width, draw_obj):
     return lines
 
 def get_text_block_size(lines, font, draw_obj):
-    """Считает реальную высоту и ширину блока текста."""
+    """Считает реальную высоту блока текста."""
     if not lines: return 0, 0
-    
-    # Высота строки (ascent + descent)
     ascent, descent = font.getmetrics()
-    line_height = ascent + descent + 15 # +15 пикселей межстрочный
+    line_height = ascent + descent + 15 
     total_height = len(lines) * line_height
-    
-    # Максимальная ширина
-    max_w = 0
-    for line in lines:
-        bbox = draw_obj.textbbox((0, 0), line, font=font)
-        max_w = max(max_w, bbox[2] - bbox[0])
-        
-    return max_w, total_height, line_height
+    return total_height, line_height
 
 async def compose_final_card(ai_image_io: BytesIO, user_text: str) -> BytesIO:
     try:
@@ -131,57 +130,56 @@ async def compose_final_card(ai_image_io: BytesIO, user_text: str) -> BytesIO:
             final_font = None
             final_line_height = 0
             
-            # 1. Подбор размера (Iterative sizing)
+            # 1. Подбор размера
             while current_font_size >= MIN_FONT_SIZE:
                 try:
                     font = ImageFont.truetype(FONT_PATH, current_font_size)
                 except IOError:
-                    logging.critical(f"🚨 FONT ERROR: Could not find {FONT_PATH}. Using ugly default!")
-                    # Если шрифта нет, используем дефолтный и прерываем цикл,
-                    # так как дефолтный не меняет размер
+                    logging.critical(f"🚨 FONT ERROR: Could not find {FONT_PATH}!")
                     font = ImageFont.load_default()
                     final_lines = wrap_text(user_text, font, TEXT_MAX_WIDTH, draw)
                     final_font = font
-                    _, _, final_line_height = get_text_block_size(final_lines, font, draw)
                     break 
                 
                 lines = wrap_text(user_text, font, TEXT_MAX_WIDTH, draw)
-                _, total_height, line_height = get_text_block_size(lines, font, draw)
+                total_height, line_height = get_text_block_size(lines, font, draw)
                 
                 if total_height <= TEXT_MAX_HEIGHT:
                     final_lines = lines
                     final_font = font
                     final_line_height = line_height
-                    break # Влезло!
+                    break 
                 
-                current_font_size -= 10 # Уменьшаем шаг
+                current_font_size -= 5
             
-            # Если вышли из цикла и шрифт не найден (fallback logic)
+            # Fallback
             if final_font is None:
                  try:
                     final_font = ImageFont.truetype(FONT_PATH, MIN_FONT_SIZE)
                  except:
                     final_font = ImageFont.load_default()
                  final_lines = wrap_text(user_text, final_font, TEXT_MAX_WIDTH, draw)
-                 _, _, final_line_height = get_text_block_size(final_lines, final_font, draw)
+                 _, final_line_height = get_text_block_size(final_lines, final_font, draw)
 
-            # 2. Рисование по центру блока
-            # Считаем реальную высоту финального блока
+            # 2. Рисование по центру
             block_height = len(final_lines) * final_line_height
-            # Центрируем блок по вертикали в доступном пространстве
             start_y = TEXT_START_Y + (TEXT_MAX_HEIGHT - block_height) / 2
             
             for line in final_lines:
-                # Центрируем строку по горизонтали
                 bbox = draw.textbbox((0, 0), line, font=final_font)
                 text_width = bbox[2] - bbox[0]
                 x = (CANVAS_SIZE[0] - text_width) / 2
                 
+                # ИСПОЛЬЗУЕМ ЦВЕТ ТЕКСТА
                 draw.text((x, start_y), line, font=final_font, fill=TEXT_COLOR)
                 start_y += final_line_height
 
-        # Рамка
-        draw.rectangle([(0, 0), (CANVAS_SIZE[0]-1, CANVAS_SIZE[1]-1)], outline=TEXT_COLOR, width=FRAME_WIDTH)
+        # Рамка: ИСПОЛЬЗУЕМ ЦВЕТ РАМКИ
+        draw.rectangle(
+            [(0, 0), (CANVAS_SIZE[0]-1, CANVAS_SIZE[1]-1)], 
+            outline=FRAME_COLOR, 
+            width=FRAME_WIDTH
+        )
 
         # Сжатие
         output_io = BytesIO()
