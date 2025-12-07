@@ -206,8 +206,11 @@ async def text_received(message: types.Message, state: FSMContext):
 # Хэндлер 2: Пользователь нажал "Skip Text"
 @dp.callback_query(CardGen.waiting_for_text, F.data == "skip_text")
 async def skip_text_action(callback: CallbackQuery, state: FSMContext):
-    # Вызываем общую функцию без текста. Используем callback.message для ответа.
-    await perform_generation(callback.message, state, user_text=None)
+    # --- ОБНОВЛЕННЫЙ ТЕКСТ ПО УМОЛЧАНИЮ ---
+    default_text = "Season's Greetings and best wishes for a prosperous and successful New Year."
+    
+    # Вызываем генерацию с этим текстом
+    await perform_generation(callback.message, state, user_text=default_text)
     await callback.answer()
 
 # --- ADMIN & MAIN ---
