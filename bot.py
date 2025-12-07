@@ -193,6 +193,13 @@ async def perform_generation(message: types.Message, state: FSMContext, user_tex
 # Хэндлер 1: Пользователь прислал текст
 @dp.message(CardGen.waiting_for_text, F.text)
 async def text_received(message: types.Message, state: FSMContext):
+    if len(message.text) > 200:
+        await message.answer(
+            f"⚠️ Your text is too long ({len(message.text)} chars). \n"
+            "Please keep it under 200 characters for the best design.\n\n"
+            "Try sending a shorter version:"
+        )
+        return
     # Вызываем общую функцию с полученным текстом
     await perform_generation(message, state, user_text=message.text)
 
