@@ -24,7 +24,7 @@ AUDIENCES = {
 GLOBAL_SAFETY = """
 GLOBAL GCC SAFETY PROTOCOL:
 STRICTLY NO ALCOHOL: No wine glasses, champagne flutes, or cocktail shakers. Use abstract cups, tea cups, or geometric tumblers only.
-NO FEMALE REPRESENTATION: To ensure cultural compliance, do not depict human female figures. Use abstract silhouettes, hands only, or focus on objects/scenery.
+NO FEMALE REPRESENTATION: To ensure cultural compliance, do not depict human female figures.
 RELIGION: No religious symbols (crosses, angels, saints).
 FOCUS: Primary focus is secular "New Year". If "Christmas" is requested, use seasonal winter aesthetics (snow, trees, lights) instead of religious icons. NO Santa Claus except for Western and Eastern expatriate audience and only if explicitly requested in the user prompt. Santa Claus must be depicted as a fun, non-religious fairytale mascot (e.g., wearing sunglasses, carrying shopping bags, or in a futuristic sleigh). NO traditional St. Nicholas religious styling.
 NO TEXT: Do not generate any text, letters, or numbers on the image unless you have a specific request and a sepcific text provided to you. Never generate anything looking like text in any language.
