@@ -18,7 +18,7 @@ MODEL_NAME = "gemini-2.5-flash-image"
 # Конфигурация Canvas
 CANVAS_SIZE = (1080, 1920)
 IMAGE_SIZE = (1080, 1080)
-FONT_PATH = "Cinzel-Regular.ttf"
+FONT_PATH = "CinzelDecorative-Regular.ttf"
 
 # Настройки текста
 MAX_FONT_SIZE = 180    # УВЕЛИЧИЛИ: Начинаем с очень крупного
