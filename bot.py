@@ -207,7 +207,7 @@ async def text_received(message: types.Message, state: FSMContext):
 @dp.callback_query(CardGen.waiting_for_text, F.data == "skip_text")
 async def skip_text_action(callback: CallbackQuery, state: FSMContext):
     # --- ОБНОВЛЕННЫЙ ТЕКСТ ПО УМОЛЧАНИЮ ---
-    default_text = "Season's Greetings and best wishes for a prosperous and successful New Year."
+    default_text = "Season's Greetings and best wishes for a prosperous and successful New Year!"
     
     # Вызываем генерацию с этим текстом
     await perform_generation(callback.message, state, user_text=default_text)
