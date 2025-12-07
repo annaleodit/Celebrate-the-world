@@ -31,7 +31,7 @@ NO TEXT: Do not generate any text, letters, or numbers on the image unless you h
 NO GLASSES: MUST NOT use glasses with drinks to avoid confusion with wine only tea and coffee are acceptable.
 NO DISTINCT people or hands or other parts of human body, only silhouettes are acceptable, women MUST be avoided or at least covered when used as silhouettes.
 NO ZODIAK signs, strictly not allowed.
-ONLY true repersetnation of skyscraper buildings, imaginative skycrapers not allowed.
+STRICTLY NO skyscrapers or city skylines allowed.
 """
 
 COUNTRY_AESTHETICS = {
