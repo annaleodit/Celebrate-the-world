@@ -166,9 +166,14 @@ def get_tips(country: str, audience: str) -> str:
     
     # Generalized Audiences
     if audience == "eastern_expats":
-        return "💡 **Insider Scoop:** This is a very mixed audience. Choose visuals and messages carefully.\n😎 **Pro Tips:** If you have Philipino colleagues or friends, 'Parol Lantern' is a winner. And there is 90% chance they celebrate Christmas. Check it and get your greeting right!\n\n"
-               "Your colleagues from Russia and CIS celebarate New Year rather than Christmas. And Christmas, if celebrated, is on January 7th. It is also a more intimate and regligious event than in western culture.\n\n"
-               "Indians..."
+        return (
+            "💡 **Insider Scoop:** This is a very mixed audience. Choose visuals and messages carefully.\n"
+            "😎 **Pro Tips:** If you have Filipino colleagues or friends, 'Parol Lantern' is a winner. "
+            "There is a 90% chance they celebrate Christmas. Check it and get your greeting right!\n\n"
+            "Your colleagues from Russia and CIS celebrate New Year rather than Christmas."
+            "Christmas, if celebrated, is on January 7th. Remember that it is a more religious holiday than in western countries and that there is a lagre muslim comunity in CIS.\n\n"
+            "For Indian colleagues, remember that many celebrate Diwali, but New Year is generally universally accepted."
+        )
     if audience == "western_expats":
         return "💡 **Insider Scoop:** Winter = BBQ Season.\n😎 **Pro Tip:** 'Christmas in dunes' theme perfectly combines the tradition with Gulf desert vibe."
     
