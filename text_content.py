@@ -31,14 +31,15 @@ NO TEXT: Do not generate any text, letters, or numbers on the image unless you h
 NO GLASSES: MUST NOT use glasses with drinks to avoid confusion with wine only tea and coffee are acceptable.
 NO DISTINCT people or hands or other parts of human body, only silhouettes are acceptable, women MUST be avoided or at least covered when used as silhouettes.
 NO ZODIAK signs, strictly not allowed.
+ONLY true repersetnation of skyscraper buildings, imaginative skycrapers not allowed.
 """
 
 COUNTRY_AESTHETICS = {
     "uae": "Aesthetic: 'Future Heritage.' Fusion of hyper-modern architecture and warm golden-hour lighting. Polished glass, steel, and gold textures. Vibe: Limitless ambition, cosmopolitan luxury.",
     "ksa": "Aesthetic: Deep, rich, and regal. Blend of historic mud-brick architecture or desert landscapes with sleek modernity. Palette: Sand, Terracotta, Deep Gold, Midnight Blue. Vibe: Dignity, warmth, 'Kashta' hospitality.",
     "qatar": "Aesthetic: Artistic and architectural refinement. Geometric patterns, calligraphy, clean lines. Palette: Dominant Maroon (Burgundy) and White. Vibe: National pride, sophistication.",
-    "kuwait": "Aesthetic: Maritime and mercantile. Sea, water towers, 'Chalet' lifestyle. Strict Restrictions: Family-centric, private. Vibe: Old Money feel, peaceful.",
-    "bahrain": "Aesthetic: Island city life. Iconic wind-turbine skyscrapers, pearl diving heritage. Vibe: Breezy, liberal, social. Visuals: Sea, pearls, sunset.",
+    "kuwait": "Aesthetic: Maritime and mercantile. Sea, dhows, 'Chalet' lifestyle. Strict Restrictions: Family-centric, private. Vibe: Old Money feel, peaceful.",
+    "bahrain": "Aesthetic: Island city life. Iconic wind-turbine world trade center, pearl diving heritage. Vibe: Breezy, liberal, social. Visuals: Sea, pearls, sunset.",
     "oman": "Aesthetic: Dramatic nature and heritage. Rugged mountains, ancient forts, low-rise white architecture. Vibe: Humble, grounded, serene. Visuals: Frankincense smoke, mountains, starry nights."
 }
 
