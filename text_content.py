@@ -52,21 +52,19 @@ AUDIENCE_RULES = {
 # --- TOPICS (FINALIZED PROMPTS) ---
 TOPICS = {
     "time": {
-        "btn": "🕰 Time & Constellations",
+        "btn": "🕰 Circle of time",
         "desc": "A sophisticated celestial-themed illustration featuring '2026' formed by glowing constellations. Best for: Business Partners & Visionaries.",
         "prompt": """
 Role
 You are a world-class illustrator specializing in sophisticated, celestial-themed luxury art. Your goal is to create a precise, elegant, and mystical geometric illustration featuring high-contrast metallics and glowing elements.
-Style & Aesthetic
-The overall aesthetic is elegant, mystical, and geometric, featuring high-contrast variations of gold and silver on deep navy or charcoal blue, with precise, thin line work and a subtle glowing effect.
-The background is a deep, rich midnight blue or blue-maroon or blue-deep green with slight variations in depth and tone. Rich maroon and rich green can be used on the background if triggered by an additional prompt.
-Scene Description
-A sophisticated celestial-themed illustration featuring the year "2026" in the center, where the numbers are formed by glowing constellations with connected star nodes and gemstones. The year '2026' is formed by a dense, geometric constellation network. Prominent, brilliant star nodes are interconnected by thicker, continuous bands of light, creating a subtle glowing lattice. The entire structure has a subtle white glow, making the numbers appear as unified celestial forms.
-Surrounding the text is a complex, symmetrical array of fine golden concentric circles and intersecting elliptical orbits of different radius. The lines crisscross and overlap each other, creating a "web" or "net" effect and mimic the chaotic but symmetrical motion of an atom or a gyroscope. Scattered throughout the orbits are small stylized planets gold or colored with luxury textures, with rings and geometric four-pointed stars. Some planets and stars are decorated with colored gemstones and jewels.
+Style & Aesthetic: High-end luxury stationery design. The look must simulate metallic hot-foil stamping (Gold, Silver, or Rose Gold) on premium textured matte paper (Deep Navy, Charcoal, or Cotton White). 
+The vibe is minimalist, geometric, and expensive, utilizing high-contrast materials and blind embossing effects.
+Scene Description: A centered composition featuring a large, minimalist clock face (represented by a fine metallic rim or geometric facets) with slender hands indicating 5 minutes to midnight. 
+The year "2026" is centered below the hands in a sophisticated serif or script typeface. At the base, stylized orbital rings and small planetary spheres sweep upwards, intertwining with the clock to create a seamless celestial countdown theme.
 """
     },
     "fireworks": {
-        "btn": "🎆 Luxury Fireworks",
+        "btn": "🎆 Fireworks arabesque",
         "desc": "Clean, expensive, and structurally precise geometric fireworks. Best for: Mixed Groups & Locals.",
         "prompt": """
 Role
@@ -92,7 +90,7 @@ A high-end e-card featuring a geometric falcon soaring the air in the left or mi
 """
     },
     "kashta": {
-        "btn": "⛺ Kashta (Desert Night)",
+        "btn": "⛺ Kashta Night",
         "desc": "Cinematic desert camping scene under the stars. Best for: Locals (KSA, Kuwait) & Authentic vibes.",
         "prompt": """
 Role & Style
@@ -103,11 +101,11 @@ Texture & Scale: Emphasize the tactile nature of sand ripples and the vast, maje
 Fidelity: Photorealistic magic realism. Not a cartoon.
 Scene Description
 A perspective looking up a sand dune at deep night. Other dunes and sands in the distance, sideways. At the very peak of the dune, a single large kashta tent glows intensely with warm welcoming light and is decorated with christmas-tree-like lights.
-Above the tent, the deep night sky is filled with stars or FULL moon that form a swirling, galaxy-like spiral pattern. The way up the dune slope towards the tent is shown with small warm lights. “SEASONAL GREETINGS 2026” is rendered in elegant lightweight fonts, slight glow as a separate layer over the image, not part of it. Modestly in a corner without overlapping key elements of the picture.
+Above the tent, the deep night sky is filled with stars or FULL moon that form a swirling, galaxy-like spiral pattern. The way up the dune slope towards the tent is shown with small warm lights.
 """
     },
     "christmas_eve": {
-        "btn": "🎄 Christmas Terrace",
+        "btn": "🎄 Christmas in dunes",
         "desc": "A cozy villa terrace overlooking the desert, decorated for Christmas. Best for: Western Expats ONLY.",
         "prompt": """
 Role & Style
@@ -148,38 +146,39 @@ def get_tips(country: str, audience: str) -> str:
     """Возвращает экспертный совет на основе комбинации"""
     # UAE
     if country == "uae" and audience == "mixed":
-        return "💡 **Insider Scoop:** The UAE is a global melting pot.\n😎 **Pro Tip:** 'Luxury Fireworks' or 'Time & Constellations' work perfectly here. They are sophisticated and neutral."
+        return "💡 **Insider Scoop:** The UAE is a global melting pot.\n😎 **Pro Tip:** 'Fireworks' or 'Time' themes work perfectly here for mixed audiences. They are sophisticated and neutral."
     if country == "uae" and audience == "locals":
-        return "💡 **Insider Scoop:** For Emiratis, focus on Vision & Prosperity.\n😎 **Pro Tip:** 'Falcon' or 'Time' (Constellations) are excellent respectful choices. Avoid party vibes."
+        return "💡 **Insider Scoop:** For Emiratis, focus on Vision & Prosperity.\n😎 **Pro Tip:** 'Falcon' or 'Time' are excellent respectful choices. Avoid mentioning parties or Christmas, stick to Season's Greetings or New Year."
 
     # KSA
     if country == "ksa" and audience == "locals":
-        return "💡 **Insider Scoop:** It's 'Kashta' Time! The desert is their winter wonderland.\n😎 **Pro Tip:** Impress them with the 'Kashta' theme. It hits right in the heart."
+        return "💡 **Insider Scoop:** It's 'Kashta' Time! The desert is KSA winter wonderland.\n😎 **Pro Tip:** Impress your friends and partners with the 'Kashta' theme. It hits right in the heart. Avoid mentioning parties or Christmas, stick to Season's Greetings or New Year."
     if country == "ksa" and audience == "mixed":
-        return "💡 **Insider Scoop:** Offices are modernizing but etiquette remains conservative.\n😎 **Pro Tip:** 'Time & Constellations' or 'Falcon' are safe, premium choices celebrating 2026."
+        return "💡 **Insider Scoop:** Offices are modernizing but etiquette remains conservative.\n😎 **Pro Tip:** 'Time' or 'Falcon' themes are safe, premium choices for your greetings. Avoid mentioning parties or Christmas, stick to Season's Greetings or New Year."
 
     # Kuwait
     if country == "kuwait" and audience == "locals":
-        return "💡 **Insider Scoop:** A quiet winter break.\n😎 **Pro Tip:** 'Kashta' or 'Time' themes respect their privacy and love for the desert winter."
+        return "💡 **Insider Scoop:** A Kashta break is a must in winter.\n😎 **Pro Tip:** 'Kashta' or 'Time' themes respect their privacy and love for the desert winter."
 
     # Oman
     if country == "oman" and audience == "locals":
-        return "💡 **Insider Scoop:** Serenity over noise.\n😎 **Pro Tip:** 'Falcon' or 'Time' fit the Omani values of dignity and nature."
+        return "💡 **Insider Scoop:** These country chooses serenity over noise.\n😎 **Pro Tip:** 'Falcon' or 'Time' fit the Omani values of dignity and nature."
     
     # Generalized Audiences
     if audience == "eastern_expats":
-        return "💡 **Insider Scoop:** The 'Ber' Months!\n😎 **Pro Tip:** 'Parol Lantern' is a winner. It acts as a universal symbol of joy and home."
-    
+        return "💡 **Insider Scoop:** This is a very mixed audience. Choose visuals carefully.\n😎 **Pro Tips:** If you have Philipino colleagues or friends, 'Parol Lantern' is a winner. And there is 90% chance they celebrate Christmas. Check it and get your greeting right!\n\n"
+                "Your Russian colleagues celebarate New Year rather than Christmas. And Christmas, if celebrated, is on January 7th. It is also a more intimate and regligious event than in western culture.\n\n"
+                "Indians...
     if audience == "western_expats":
-        return "💡 **Insider Scoop:** Winter = BBQ Season.\n😎 **Pro Tip:** 'Christmas Terrace' captures their ideal Gulf winter evening."
+        return "💡 **Insider Scoop:** Winter = BBQ Season.\n😎 **Pro Tip:** 'Christmas in dunes' theme perfectly combines the tradition with Gulf desert vibe."
     
     if country == "qatar":
-        return "💡 **Insider Scoop:** Maroon Elegance.\n😎 **Pro Tip:** Themes like 'Time' or 'Fireworks' work well. The AI will try to respect the local palette."
+        return "💡 **Insider Scoop:** Qatar National Day is on December 18th, don't miss it.\n😎 **Pro Tip:** Themes like 'Time' or 'Fireworks' work well. Maroon Elegance would be a good choice. The AI will try to respect the local palette."
     
     if country == "bahrain":
-        return "💡 **Insider Scoop:** The Island Vibe.\n😎 **Pro Tip:** Friendly and open! 'Fireworks' are very welcome here."
+        return "💡 **Insider Scoop:** Bahrain is famously open and social and has an Island Vibe.\n😎 **Pro Tip:** You can be a bit more relaxed here! 'Fireworks' are very welcome here as well as celebrations generally."
 
-    return "💡 **Tip:** Remember the Golden Rule of GCC: Be respectful, avoid alcohol imagery, and focus on shared values like prosperity, light, and warmth."
+    return "💡 **Tip:** Remember the Golden Rule of GCC: Be respectful, exclude alcohol imagery and religious elements, focus on shared values like prosperity, light, and warmth."
 
 def get_available_topics(audience: str):
     """Фильтрует топики для безопасности"""
