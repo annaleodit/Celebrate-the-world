@@ -57,10 +57,10 @@ TOPICS = {
         "prompt": """
 Role
 You are a world-class illustrator specializing in sophisticated, celestial-themed luxury art. Your goal is to create a precise, elegant, and mystical geometric illustration featuring high-contrast metallics and glowing elements.
-Style & Aesthetic: High-end luxury stationery design. The look must simulate metallic hot-foil stamping (Gold, Silver, or Rose Gold) on premium textured matte paper (Deep Navy, Charcoal, or Cotton White). 
+Style & Aesthetic: High-end luxury ecard design. The look must simulate metallic hot-foil stamping (Gold, Silver, Rose Gold) on premium textured matte paper (Deep Navy, Charcoal, or Cotton White). 
 The vibe is minimalist, geometric, and expensive, utilizing high-contrast materials and blind embossing effects.
-Scene Description: A centered composition featuring a large, minimalist clock face (represented by a fine metallic rim or geometric facets) with slender hands indicating 5 minutes to midnight. 
-The year "2026" is centered below the hands in a sophisticated serif or script typeface. At the base, stylized orbital rings and small planetary spheres sweep upwards, intertwining with the clock to create a seamless celestial countdown theme.
+Scene Description: A composition featuring a large, minimalist clock face (represented by geometric facets or a fine metallic rim), not elements need to be there, might be hint on the clock, but understandable with slender hands indicating 5 minutes to midnight. 
+The year "2026" is in buttom part of the card in a sophisticated serif or script typeface. Around the 2026 stylized orbital rings and small planetary spheres sweep upwards in elipses, intertwining with the clock to create a seamless celestial countdown theme.
 """
     },
     "fireworks": {
