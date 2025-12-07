@@ -16,10 +16,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# --- ВАЖНО: КОПИРУЕМ ШРИФТЫ ЯВНО ---
-# Копируем файл шрифта в рабочую папку контейнера
-COPY Cinzel-Regular.ttf . 
-# -----------------------------------
+# --- ИСПРАВЛЕНИЕ: Копируем любой TTF файл ---
+COPY *.ttf . 
+# --------------------------------------------
 
 # Копируем код бота
 COPY . .
