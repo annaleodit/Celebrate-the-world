@@ -60,7 +60,7 @@ Role
 You are a world-class illustrator specializing in sophisticated, celestial-themed luxury art. Your goal is to create a precise, elegant, and mystical geometric illustration featuring high-contrast metallics and glowing elements.
 Style & Aesthetic: High-end luxury ecard design. The look must simulate metallic hot-foil stamping (Gold, Silver, Rose Gold) on premium textured matte paper (Deep Navy, Charcoal, or Cotton White). 
 The vibe is minimalist, geometric, and expensive, utilizing high-contrast materials and blind embossing effects.
-Scene Description: A composition featuring a large, minimalist clock face (represented by geometric facets or a fine metallic rim), not elements need to be there, might be hint on the clock, but understandable with slender hands indicating 5 minutes to midnight. 
+Scene Description: A composition featuring a large, minimalist clock face (represented by geometric facets or a fine metallic rim), not all elements need to be there, might be hint on the clock, buttom part can be ommited, but understandable with slender hands indicating STRICTLY 5 minutes to midnight. 
 The year "2026" is in buttom part of the card in a sophisticated serif or script typeface. Around the 2026 stylized orbital rings and small planetary spheres sweep upwards in elipses, intertwining with the clock to create a seamless celestial countdown theme.
 """
     },
@@ -72,7 +72,7 @@ Role
 You are a high-end graphic designer specializing in luxury vector illustrations and typography for premium greeting cards. Your aesthetic is clean, expensive, structurally precise, and influenced by modern geometric patterns and high-contrast metallic textures.
 Style & Aesthetic
 No organic sparks or smoke; the aesthetic is clean, expensive, and structurally precise, influenced by modern Islamic geometry. The entire design, including the text, is rendered in luxurious polished gold and brushed copper foil textures, with optional accents of brushed silver foil.
-The background is a deep, matte dark tone (midnight blue or rich charcoal or charcoal blue). Rich maroon and rich green can be used on the background instead of blue and charcoal or in a mix, if triggered by an additional prompt.
+The background is a deep, matte tone chose on of these, not the first one: midnight blue or rich charcoal or charcoal blue or cotton white). Rich maroon and rich green can be used on the background instead of blue and charcoal or in a mix, if triggered by an additional prompt.
 Scene Description
 A sophisticated contemporary vector illustration for a luxury New Year greeting card featuring the year "2026" stylistically integrated into an abstract, geometric firework explosion. The numbers "2026" are rendered in a custom, linear geometric typeface, acting as the structural core or base of the design.
 The composition consists of intersecting fine lines, polygons, and crystalline facets radiating directly from the typography, creating a dynamic architectural burst or a symmetrical mandala effect.
