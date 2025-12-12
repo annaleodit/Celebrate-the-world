@@ -29,7 +29,7 @@ RELIGION: No religious symbols (crosses, angels, saints).
 FOCUS: Primary focus is secular "New Year". If "Christmas" is requested, use seasonal winter aesthetics (snow, trees, lights) instead of religious icons. NO Santa Claus except for Western and Eastern expatriate audience and only if explicitly requested in the user prompt. Santa Claus must be depicted as a fun, non-religious fairytale mascot (e.g., wearing sunglasses, carrying shopping bags, or in a futuristic sleigh). NO traditional St. Nicholas religious styling.
 TEXT RULES: Do not generate any text, letters, or numbers UNLESS explicitly asked for the year "2026". Apart from "2026", avoid any other text.
 NO GLASSES: MUST NOT use glasses with drinks to avoid confusion with wine only tea and coffee are acceptable.
-HUMAN FIGURES: NO DISTINCT people or hands or other parts of human body. Only abstract silhouettes are acceptable if necessary, women MUST be avoided or at least fully covered/abaya when used as silhouettes.
+HUMAN FIGURES: NO DISTINCT people or hands or other parts of human body. Women MUST be avoided or at least fully covered/abaya when used as silhouettes.
 NO ZODIAK signs, strictly not allowed.
 STRICTLY NO skyscrapers or city skylines allowed unless specified in the topic.
 """
@@ -39,7 +39,7 @@ COUNTRY_AESTHETICS = {
     "ksa": "Aesthetic: Deep, rich, and regal. Blend of historic mud-brick architecture or desert landscapes with sleek modernity. Vibe: Dignity, warmth, 'Kashta' hospitality. Color Palette: Sand, Terracotta, Deep Gold, Midnight Blue.",
     "qatar": "Aesthetic: Artistic and architectural refinement. Geometric patterns, calligraphy, clean lines. Vibe: National pride, sophistication. Color Palette: Dominant Maroon (Burgundy) and White.",
     "kuwait": "Aesthetic: Maritime and mercantile. Sea, dhows, 'Chalet' lifestyle. Strict Restrictions: Family-centric, private. Vibe: Old Money feel, peaceful. Color Palette: Azure Blue, Sand, White, Gold.",
-    "bahrain": "Aesthetic: Island city life. Iconic wind-turbine world trade center, pearl diving heritage. Vibe: Breezy, liberal, social. Visuals: Sea, pearls, sunset. Color Palette: Coral, Pearl White, Red, Blue.",
+    "bahrain": "Aesthetic: Island city life. Pearl diving heritage. Vibe: Breezy, liberal, social. Visuals: Sea, pearls, fireworks. Color Palette: Coral, Pearl White, Red, Blue.",
     "oman": "Aesthetic: Dramatic nature and heritage. Rugged mountains, ancient forts, low-rise white architecture. Vibe: Humble, grounded, serene. Visuals: Frankincense smoke, mountains, starry nights. Color Palette: Earth tones, White, Green, Silver."
 }
 
@@ -62,7 +62,7 @@ Style & Aesthetic: High-end luxury ecard design. The look must simulate metallic
 IMPORTANT: The background color of the paper MUST match the 'Color Palette' defined in the Country Aesthetic section.
 The vibe is minimalist, geometric, and expensive.
 Scene Description: A composition featuring a large, minimalist clock face with a fine metallic rim.
-CRITICAL: The clock hands are indicating 11:55 (five minutes to midnight). The countdown is almost over.
+CRITICAL: The clock hands position must be as described. One 2 hands, the shorter hand facing exactly upright. longer hand - 5 degrees left so that they are indicating 11:55 (five minutes to midnight). The countdown is almost over.
 The year "2026" is in the bottom part of the card in a sophisticated serif or script typeface. Around the 2026 stylized orbital rings and small planetary spheres sweep upwards in ellipses, intertwining with the clock to create a seamless celestial countdown theme.
 """
     },
@@ -106,7 +106,7 @@ A dramatic, wide-angle shot of a landscape at deep night.
 **Terrain Logic (Must match the Country Context):**
 - IF Bahrain: The setting is a quiet seaside/beach with sand and water reflections.
 - IF Oman: The setting is a rugged mountain slope or a rocky Wadi.
-- IF KSA/Kuwait/UAE: The setting is majestic sand dunes.
+- IF KSA/Qatar/Kuwait/UAE: The setting is majestic sand dunes.
 
 **Composition & Framing:**
 A single large Kashta tent glows intensely with warm light at the top of a slope or hill.
