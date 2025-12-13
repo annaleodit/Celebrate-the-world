@@ -50,13 +50,12 @@ async def get_all_users():
 # --- FSM STATES ---
 class CardGen(StatesGroup):
     choosing_country = State()
-    choosing_audience = State()
     choosing_topic = State()
     confirming_topic = State()
-    waiting_for_text = State() # НОВОЕ СОСТОЯНИЕ
+    waiting_for_text = State()
 
 # --- KEYBOARD BUILDER (INLINE) ---
-def make_inline_kb(items: dict, prefix: str, cols=2):
+def make_inline_kb(items: dict, prefix: str, cols=2, add_cancel=False):
     builder = []
     keys = list(items.keys())
     for i in range(0, len(keys), cols):
@@ -65,6 +64,8 @@ def make_inline_kb(items: dict, prefix: str, cols=2):
             btn_text = items[key] if isinstance(items[key], str) else items[key]["btn"]
             row.append(InlineKeyboardButton(text=btn_text, callback_data=f"{prefix}:{key}"))
         builder.append(row)
+    if add_cancel:
+        builder.append([InlineKeyboardButton(text="В начало", callback_data="cancel")])
     return InlineKeyboardMarkup(inline_keyboard=builder)
 
 # --- HANDLERS: START & FLOW ---
@@ -73,35 +74,26 @@ def make_inline_kb(items: dict, prefix: str, cols=2):
 async def cmd_start(message: types.Message, state: FSMContext):
     await state.clear()
     await add_user(message.from_user.id, message.from_user.username)
-    kb = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="🚀 Start Creating", callback_data="start_flow")]])
-    await message.answer("Hello! Tap the button below to start creating your professional GCC greeting card.", reply_markup=kb)
+    kb = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="🚀 Начать создание", callback_data="start_flow")]])
+    await message.answer("Привет! Нажмите кнопку ниже, чтобы начать создание профессиональной поздравительной открытки.", reply_markup=kb)
 
 @dp.callback_query(F.data == "start_flow")
 async def start_flow(callback: CallbackQuery, state: FSMContext):
     await state.set_state(CardGen.choosing_country)
-    await callback.message.edit_text("First, select the GCC country:", reply_markup=make_inline_kb(tc.COUNTRIES, prefix="country"))
+    await callback.message.edit_text("Из какой страны получатель вашей открытки?", reply_markup=make_inline_kb(tc.COUNTRIES, prefix="country", add_cancel=True))
     await callback.answer()
 
 @dp.callback_query(F.data.startswith("country:"))
 async def country_chosen(callback: CallbackQuery, state: FSMContext):
     country_code = callback.data.split(":")[1]
     await state.update_data(country=country_code)
-    await state.set_state(CardGen.choosing_audience)
-    await callback.message.edit_text(f"Selected: {tc.COUNTRIES[country_code]}\n\nNow, who is this greeting for?", reply_markup=make_inline_kb(tc.AUDIENCES, prefix="audience", cols=1))
-    await callback.answer()
-
-@dp.callback_query(F.data.startswith("audience:"))
-async def audience_chosen(callback: CallbackQuery, state: FSMContext):
-    audience_code = callback.data.split(":")[1]
-    data = await state.get_data()
-    await state.update_data(audience=audience_code)
     
-    avail_topics_keys = tc.get_available_topics(audience_code)
+    avail_topics_keys = tc.get_available_topics(country_code)
     filtered_topics = {k: tc.TOPICS[k] for k in avail_topics_keys}
-    tip_text = tc.get_tips(data['country'], audience_code)
+    tip_text = tc.get_tips(country_code)
     
     await state.set_state(CardGen.choosing_topic)
-    await callback.message.edit_text(f"🎯 Target: {tc.AUDIENCES[audience_code]}\n\n{tip_text}\n\n👇 **Select a theme:**", reply_markup=make_inline_kb(filtered_topics, prefix="topic", cols=2), parse_mode="Markdown")
+    await callback.message.edit_text(f"Выбрано: {tc.COUNTRIES[country_code]}\n\n{tip_text}\n\n👇 **Выберите тему:**", reply_markup=make_inline_kb(filtered_topics, prefix="topic", cols=2, add_cancel=True), parse_mode="Markdown")
     await callback.answer()
 
 @dp.callback_query(F.data.startswith("topic:"))
@@ -112,20 +104,22 @@ async def topic_chosen(callback: CallbackQuery, state: FSMContext):
     topic_name = tc.TOPICS[topic_code]["btn"]
     
     kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="✅ Continue to Text", callback_data="ask_for_text")],
-        [InlineKeyboardButton(text="⬅️ Back to Topics", callback_data="back_to_topics")]
+        [InlineKeyboardButton(text="✅ Продолжить к тексту", callback_data="ask_for_text")],
+        [InlineKeyboardButton(text="⬅️ Назад к темам", callback_data="back_to_topics")],
+        [InlineKeyboardButton(text="В начало", callback_data="cancel")]
     ])
     await state.set_state(CardGen.confirming_topic)
-    await callback.message.edit_text(f"**Theme Selected:** {topic_name}\n\n{desc}\n\nProceed to add your personal message?", reply_markup=kb, parse_mode="Markdown")
+    await callback.message.edit_text(f"**Выбрана тема:** {topic_name}\n\n{desc}\n\nПерейти к добавлению вашего персонального сообщения?", reply_markup=kb, parse_mode="Markdown")
     await callback.answer()
 
 @dp.callback_query(F.data == "back_to_topics")
 async def back_to_topics(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
-    avail_topics_keys = tc.get_available_topics(data['audience'])
+    avail_topics_keys = tc.get_available_topics(data['country'])
     filtered_topics = {k: tc.TOPICS[k] for k in avail_topics_keys}
+    tip_text = tc.get_tips(data['country'])
     await state.set_state(CardGen.choosing_topic)
-    await callback.message.edit_text("👇 **Select a theme:**", reply_markup=make_inline_kb(filtered_topics, prefix="topic", cols=2), parse_mode="Markdown")
+    await callback.message.edit_text(f"Выбрано: {tc.COUNTRIES[data['country']]}\n\n{tip_text}\n\n👇 **Выберите тему:**", reply_markup=make_inline_kb(filtered_topics, prefix="topic", cols=2, add_cancel=True), parse_mode="Markdown")
     await callback.answer()
 
 # --- НОВЫЙ ЭТАП: ЗАПРОС ТЕКСТА ---
@@ -133,60 +127,116 @@ async def back_to_topics(callback: CallbackQuery, state: FSMContext):
 @dp.callback_query(F.data == "ask_for_text")
 async def ask_for_text_action(callback: CallbackQuery, state: FSMContext):
     """Переводит бота в режим ожидания текста от пользователя."""
+    data = await state.get_data()
+    
+    # Показываем предпросмотр выбранных параметров
+    preview_text = (
+        f"📋 **Предпросмотр параметров:**\n\n"
+        f"🌍 Страна: {tc.COUNTRIES[data['country']]}\n"
+        f"🎨 Тема: {tc.TOPICS[data['topic']]['btn']}\n\n"
+        f"---\n\n"
+        f"✍️ **Добавьте ваше персональное сообщение.**\n\n"
+        f"Отправьте текст, который должен появиться на открытке (например, 'С Новым годом от [Название компании]').\n"
+        f"Для лучшего вида сохраняйте текст кратким!\n\n"
+        f"*Или нажмите Пропустить ниже.*"
+    )
+    
     await state.set_state(CardGen.waiting_for_text)
     
-    # Кнопка для тех, кто не хочет писать текст
+    # Кнопки: Пропустить и В начало
     skip_kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Skip Text & Generate ⏩", callback_data="skip_text")]
+        [InlineKeyboardButton(text="⏩ Пропустить текст и создать", callback_data="skip_text")],
+        [InlineKeyboardButton(text="В начало", callback_data="cancel")]
     ])
     
-    await callback.message.edit_text(
-        "✍️ **Add your personal message.**\n\n"
-        "Send me the text you want to appear on the card (e.g., 'Season's Greetings from [Company Name]').\n"
-        "Keep it concise for the best look!\n\n"
-        "*Or tap Skip below.*",
-        reply_markup=skip_kb,
-        parse_mode="Markdown"
-    )
+    await callback.message.edit_text(preview_text, reply_markup=skip_kb, parse_mode="Markdown")
     await callback.answer()
 
 # --- ФИНАЛЬНАЯ ГЕНЕРАЦИЯ (С ТЕКСТОМ ИЛИ БЕЗ) ---
 
-async def perform_generation(message: types.Message, state: FSMContext, user_text: str = None):
+async def perform_generation(message: types.Message, state: FSMContext, user_text: str = None, retry_count: int = 0):
     """Общая функция для генерации и отправки, вызывается из двух хэндлеров ниже."""
     data = await state.get_data()
+    max_retries = 2
     
     # Информируем пользователя о начале процесса
-    status_msg = await message.answer("🎨 Creating your professional card... This involves AI generation and graphical composition. Please wait (approx 15-20s)...")
+    status_msg = await message.answer("🎨 Создаю вашу профессиональную открытку... Это включает генерацию AI и графическую композицию. Пожалуйста, подождите (примерно 15-20 сек)...")
     
-    # 1. Генерация AI картинки
-    final_prompt = tc.build_final_prompt(data['country'], data['audience'], data['topic'])
-    ai_image_io = await ai_service.generate_image_bytes(final_prompt)
+    # 1. Генерация AI картинки с retry
+    final_prompt = tc.build_final_prompt(data['country'], data['topic'])
+    ai_image_io = None
+    
+    for attempt in range(max_retries + 1):
+        try:
+            if attempt > 0:
+                await status_msg.edit_text(f"🔄 Повторная попытка генерации изображения... (попытка {attempt + 1}/{max_retries + 1})")
+                await asyncio.sleep(2)
+            
+            ai_image_io = await ai_service.generate_image_bytes(final_prompt)
+            if ai_image_io:
+                break
+        except Exception as e:
+            logging.error(f"Ошибка генерации изображения (попытка {attempt + 1}): {e}")
+            if attempt == max_retries:
+                await status_msg.edit_text(
+                    "⚠️ **Ошибка генерации изображения**\n\n"
+                    "К сожалению, не удалось создать изображение. Возможные причины:\n"
+                    "• Проблемы с API Google Gemini\n"
+                    "• Превышен лимит запросов\n"
+                    "• Нестабильное интернет-соединение\n\n"
+                    "Попробуйте позже или начните заново командой /start"
+                )
+                await state.clear()
+                return
     
     if not ai_image_io:
-        await status_msg.edit_text("⚠️ AI Generation Error. Please try again later.")
+        await status_msg.edit_text(
+            "⚠️ **Ошибка генерации изображения**\n\n"
+            "Не удалось создать изображение после нескольких попыток.\n"
+            "Попробуйте позже или начните заново командой /start"
+        )
         await state.clear()
         return
 
     # 2. Сборка финальной открытки (Холст + AI + Текст + Рамка)
-    await status_msg.edit_text("🖌️ Composing final design and applying golden frame...")
-    final_card_io = await ai_service.compose_final_card(ai_image_io, user_text)
+    await status_msg.edit_text("🖌️ Компоную финальный дизайн и применяю золотую рамку...")
+    
+    try:
+        final_card_io = await ai_service.compose_final_card(ai_image_io, user_text)
+    except Exception as e:
+        logging.error(f"Ошибка композиции открытки: {e}")
+        await status_msg.edit_text(
+            "⚠️ **Ошибка при создании открытки**\n\n"
+            "Не удалось собрать финальную композицию.\n"
+            "Попробуйте позже или начните заново командой /start"
+        )
+        await state.clear()
+        return
     
     if final_card_io:
         file_bytes = final_card_io.getvalue()
         # Важно: отправляем как фото, чтобы телеграм показал превью
-        input_file = BufferedInputFile(file_bytes, filename="greeting_card_stories.jpg")
+        input_file = BufferedInputFile(file_bytes, filename="greeting_card.jpg")
         
         caption = (
-            f"Here is your professional card for {tc.COUNTRIES[data['country']]}!\n"
-            f"Format: Instagram Stories (9:16)\n\n"
-            "Tap /start to create another one."
+            f"Вот ваша профессиональная открытка для {tc.COUNTRIES[data['country']]}!\n\n"
+            f"Эта открытка была создана с помощью @culture_card_bot\n\n"
+            f"Нажмите /start, чтобы создать еще одну."
         )
         
+        # Кнопка "Начать заново"
+        restart_kb = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="🔄 Создать еще одну", callback_data="start_flow")]
+        ])
+        
         await status_msg.delete()
-        await bot.send_photo(chat_id=message.chat.id, photo=input_file, caption=caption)
+        await bot.send_photo(chat_id=message.chat.id, photo=input_file, caption=caption, reply_markup=restart_kb)
     else:
-        await status_msg.edit_text("⚠️ Error during final card composition.")
+        await status_msg.edit_text(
+            "⚠️ **Ошибка при создании открытки**\n\n"
+            "Не удалось собрать финальную композицию.\n"
+            "Попробуйте позже или начните заново командой /start"
+        )
     
     await state.clear()
 
@@ -195,9 +245,9 @@ async def perform_generation(message: types.Message, state: FSMContext, user_tex
 async def text_received(message: types.Message, state: FSMContext):
     if len(message.text) > 200:
         await message.answer(
-            f"⚠️ Your text is too long ({len(message.text)} chars). \n"
-            "Please keep it under 200 characters for the best design.\n\n"
-            "Try sending a shorter version:"
+            f"⚠️ Ваш текст слишком длинный ({len(message.text)} символов).\n"
+            "Пожалуйста, ограничьтесь 200 символами для лучшего дизайна.\n\n"
+            "Попробуйте отправить более короткую версию:"
         )
         return
     # Вызываем общую функцию с полученным текстом
@@ -213,12 +263,22 @@ async def skip_text_action(callback: CallbackQuery, state: FSMContext):
     await perform_generation(callback.message, state, user_text=default_text)
     await callback.answer()
 
+# --- ОБРАБОТКА ОТМЕНЫ ---
+@dp.callback_query(F.data == "cancel")
+async def cancel_action(callback: CallbackQuery, state: FSMContext):
+    await state.clear()
+    await callback.message.edit_text(
+        "Создание открытки остановлено.\n\n"
+        "Нажмите /start, чтобы начать заново."
+    )
+    await callback.answer()
+
 # --- ADMIN & MAIN ---
 @dp.message(Command("stats"))
 async def cmd_stats(message: types.Message):
     if message.from_user.id == config.ADMIN_ID:
         users = await get_all_users()
-        await message.answer(f"📊 Total Users: {len(users)}")
+        await message.answer(f"📊 Всего пользователей: {len(users)}")
 
 @dp.message(Command("broadcast"))
 async def cmd_broadcast(message: types.Message):
@@ -226,7 +286,7 @@ async def cmd_broadcast(message: types.Message):
         parts = message.text.split(maxsplit=1)
         if len(parts) > 1:
             users = await get_all_users()
-            msg = await message.answer("Starting broadcast...")
+            msg = await message.answer("Начинаю рассылку...")
             count = 0
             for uid in users:
                 try:
@@ -234,7 +294,7 @@ async def cmd_broadcast(message: types.Message):
                     count += 1
                     await asyncio.sleep(0.05)
                 except: pass
-            await msg.edit_text(f"✅ Broadcast done. Sent to {count} users.")
+            await msg.edit_text(f"✅ Рассылка завершена. Отправлено {count} пользователям.")
 
 async def main():
     await init_db()
