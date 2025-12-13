@@ -7,7 +7,8 @@
 COUNTRIES = {
     "uae": "🇦🇪 UAE",
     "ksa": "🇸🇦 Saudi Arabia",
-    "india": "🇮🇳 India"
+    "india": "🇮🇳 India",
+    "china": "🇨🇳 China"
 }
 
 # --- PROMPT PARTS ---
@@ -27,6 +28,7 @@ STRICTLY NO skyscrapers or city skylines allowed unless specified in the topic.
 GLOBAL_SAFETY_INDIA = """
 GLOBAL SAFETY INDIA:
 NO people in the images
+TEXT RULES: Do not generate any text, letters, or numbers UNLESS explicitly asked for the year "2026". Apart from "2026", avoid any other text.
 NO images of cows or bulls
 NO images of pigs or pork
 NO alcohol in the images
@@ -34,10 +36,21 @@ NO Christian religious symbols
 NO sexuality
 """
 
+GLOBAL_SAFETY_CHINA = """
+GLOBAL SAFETY CHINA:
+NO Christian religious symbols
+NO revealing sexualised figures
+NO only white and black colours
+NO sharp objects like knives
+NO pears
+NO number 4
+"""
+
 COUNTRY_AESTHETICS = {
     "uae": "Aesthetic: 'Future Heritage.' Fusion of hyper-modern architecture and warm golden-hour lighting. Polished glass, steel, and gold textures. Vibe: Limitless ambition, cosmopolitan luxury. Color Palette: Gold, White, Silver, Warm Beige.",
     "ksa": "Aesthetic: Deep, rich, and regal. Blend of historic mud-brick architecture or desert landscapes with sleek modernity. Vibe: Dignity, warmth, hospitality. Color Palette: Sand, Terracotta, Deep Gold, Midnight Blue.",
-    "india": "Aesthetic: Rich, luxurious, and culturally sophisticated. Blend of traditional Indian design elements with contemporary luxury. Vibe: Opulent, celebratory, refined. Color Palette: Royal jewel tones (Rani Pink, Midnight Blue, Emerald Green), Gold, Cream, Taupe, Blush Pink."
+    "india": "Aesthetic: Rich, luxurious, and culturally sophisticated. Blend of traditional Indian design elements with contemporary luxury. Vibe: Opulent, celebratory, refined. Color Palette: Royal jewel tones (Rani Pink, Midnight Blue, Emerald Green), Gold, Cream, Taupe, Blush Pink.",
+    "china": "Aesthetic: Luxury, modern, festive, focused on future. Focus on prosperity and happiness. Color Palette: Deep red velvet, dark cherry red, gold."
 }
 
 # --- TOPICS (FINALIZED PROMPTS) ---
@@ -126,6 +139,53 @@ CRITICAL COMPOSITION REQUIREMENTS:
 - NO negative space around the design. The background color/texture must extend to all edges.
 - This is a full-screen digital artwork, NOT a photograph of a physical card. The entire canvas IS the design itself.
 """
+    },
+    "prosperity": {
+        "btn": "🌸 Процветание",
+        "desc": "Elegant festive design featuring a plum blossom branch in rich red and gold. Best for: China.",
+        "prompt": """
+Role
+You are a world-class designer specializing in luxury Chinese New Year e-card designs. Your goal is to create elegant, festive, and culturally respectful designs.
+Style & Aesthetic
+Elegant festive design featuring a plum blossom branch in a rich red and gold color scheme. The branch is crafted from polished gold, adorned with blossoms made of ruby and rose quartz crystals or delicate gold outlines. Explosive gold and red fireworks illuminate the scene, potentially forming abstract patterns. Each card should include the festive text "2026". The background is a deep red velvet or textured paper, creating a luxurious and celebratory atmosphere. Includes the text 'Prosperity in Bloom' in elegant gold script. High resolution, ornate, detailed, cinematic lighting.
+CRITICAL COMPOSITION REQUIREMENTS:
+- The image must be EDGE-TO-EDGE. NO white borders, NO margins, NO frames, NO physical card edges visible.
+- The design must fill 100% of the canvas from edge to edge.
+- NO negative space around the design. The background color/texture must extend to all edges.
+- This is a full-screen digital artwork, NOT a photograph of a physical card. The entire canvas IS the design itself.
+"""
+    },
+    "abundance": {
+        "btn": "🐟 Изобилие",
+        "desc": "Hyper-luxurious Chinese New Year 2026 e-card with 'Modern China Vibe' featuring Cyber-Koi fish. Best for: China.",
+        "prompt": """
+Role
+You are a world-class designer specializing in hyper-luxurious Chinese New Year e-card designs with modern digital aesthetics. Your goal is to create sophisticated, fluid, and culturally respectful designs.
+Style & Aesthetic
+A hyper-luxurious, high-end Chinese New Year 2026 e-card, with a 'Modern China Vibe'. The central visual features two stylized 'Cyber-Koi' fish, depicted as luminous forms of liquid gold or glowing neon data streams. They convey dynamic movement, leaving behind shimmering trails of golden particles and subtle light streaks, emphasizing flow and digital elegance.
+The background is a deep, rich Dark Cherry red or dark Imperial Violet purple, subtly textured with abstract digital patterns. The overall aesthetic is sophisticated and fluid, symbolizing unimpeded energy flow.
+The text 'Prosperous New Year 2026' is elegantly integrated into the composition, rendered in glowing gold or luminous neon typography. The design is balanced, with cinematic lighting creating a sense of luxury and depth. Ultra-detailed, high resolution, with metallic and holographic textures, and a photorealistic luxury paper finish. Focus on abstract, digital, flowing forms of the Koi.
+CRITICAL COMPOSITION REQUIREMENTS:
+- The image must be EDGE-TO-EDGE. NO white borders, NO margins, NO frames, NO physical card edges visible.
+- The design must fill 100% of the canvas from edge to edge.
+- NO negative space around the design. The background color/texture must extend to all edges.
+- This is a full-screen digital artwork, NOT a photograph of a physical card. The entire canvas IS the design itself.
+"""
+    },
+    "light_happiness": {
+        "btn": "✨ Свет и радость",
+        "desc": "Luxurious Chinese New Year e-card with extreme macro photography of a lit golden sparkler. Best for: China.",
+        "prompt": """
+Role
+You are a world-class designer specializing in luxury Chinese New Year e-card designs with extreme macro photography aesthetics. Your goal is to create intimate, magical, and culturally respectful designs.
+Style & Aesthetic
+A luxurious Chinese New Year e-card design, extreme macro photography style. A close-up view of a lit golden sparkler (bengal light) burning intensely. The core is molten gold. Branching, crystalline golden sparks fly intensely outwards and upwards, creating a feathery, organic pattern of light. The very tips of the branching sparks terminate in tiny, soft glowing pearl-like spheres before fading, creating a magical, jewel-like effect. The background is a dark, rich, blurred bokeh of deep reds and gold lights, very intimate and warm. The year "2026" is subtly formed by the trailing light of the sparkler. The feeling is personal joy and holding magic in one's hands.
+CRITICAL COMPOSITION REQUIREMENTS:
+- The image must be EDGE-TO-EDGE. NO white borders, NO margins, NO frames, NO physical card edges visible.
+- The design must fill 100% of the canvas from edge to edge.
+- NO negative space around the design. The background color/texture must extend to all edges.
+- This is a full-screen digital artwork, NOT a photograph of a physical card. The entire canvas IS the design itself.
+"""
     }
 }
 
@@ -145,6 +205,10 @@ def get_tips(country: str) -> str:
     if country == "india":
         return "💡 **Рекомендации:** Индийская культура ценит роскошь и традиции.\n😎 **Профессиональный совет:** Темы 'Мандала', 'Королевский стиль' или 'Вечеринка в городе' - отличный выбор для индийских получателей. Все темы учитывают культурные особенности и безопасность."
 
+    # China
+    if country == "china":
+        return "💡 **Рекомендации:** В Китае Новый год — это второстепенный праздник по сравнению с Лунным новым годом. В 2026 году он выпадает на 17 февраля, а праздники продлятся с 16 февраля до 3 марта. Обязательно поздравьте ваших коллег с Лунным новым годом.\n💡 Новый год в западном стиле отмечают только в крупных городах.\n💡 Не поздравляйте ваших китайских коллег с Рождеством, даже если они проживают на западе.\n😎 **Профессиональный совет:** Темы 'Процветание', 'Изобилие' или 'Свет и радость' - отличный выбор для китайских получателей. Все темы учитывают культурные особенности и безопасность."
+
     return "💡 **Совет:** Помните золотое правило: Будьте уважительны, исключайте изображения алкоголя и религиозные элементы, фокусируйтесь на общих ценностях, таких как процветание, свет и тепло."
 
 def get_available_topics(country: str):
@@ -152,6 +216,9 @@ def get_available_topics(country: str):
     if country == "india":
         # Для Индии: mandala, modern_royal, urban_vibes
         return ["mandala", "modern_royal", "urban_vibes"]
+    elif country == "china":
+        # Для Китая: prosperity, abundance, light_happiness
+        return ["prosperity", "abundance", "light_happiness"]
     else:
         # Для UAE и KSA: time, fireworks, falcon
         return ["time", "fireworks", "falcon"]
@@ -166,6 +233,8 @@ def build_final_prompt(country_code, topic_code):
     # 2. Выбираем правильный safety protocol в зависимости от страны
     if country_code == "india":
         safety_protocol = GLOBAL_SAFETY_INDIA
+    elif country_code == "china":
+        safety_protocol = GLOBAL_SAFETY_CHINA
     else:
         safety_protocol = GLOBAL_SAFETY
     
