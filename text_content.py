@@ -39,11 +39,13 @@ NO sexuality
 GLOBAL_SAFETY_CHINA = """
 GLOBAL SAFETY CHINA:
 NO Christian religious symbols
+NO Chinese cheracters or letters
 NO revealing sexualised figures
 NO only white and black colours
 NO sharp objects like knives
 NO pears
 NO number 4
+TEXT RULES: You may include the year "2026" and specific festive text mentioned in the prompt (such as "Prosperity in Bloom" or "Prosperous New Year 2026"). Do not generate any other text, letters, or numbers.
 """
 
 COUNTRY_AESTHETICS = {
@@ -65,7 +67,7 @@ Style & Aesthetic: High-end luxury ecard design. The look must simulate metallic
 IMPORTANT: The background color of the paper MUST match the 'Color Palette' defined in the Country Aesthetic section.
 The vibe is minimalist, geometric, and expensive.
 Scene Description: A composition featuring a large, minimalist clock face with a fine metallic rim.
-CRITICAL: The clock hands position must be as described. One 2 hands, the shorter hand facing exactly upright. longer hand - 5 degrees left so that they are indicating 11:55 (five minutes to midnight). The countdown is almost over.
+CRITICAL: The clock hands position must be as described. ONlY TWO HANDS in the clock. The shorter hand facing exactly upright, the longer hand - 5 degrees left so that they are indicating 11:55 (five minutes to midnight).
 The year "2026" is in the bottom part of the card in a sophisticated serif or script typeface. Around the 2026 stylized orbital rings and small planetary spheres sweep upwards in ellipses, intertwining with the clock to create a seamless celestial countdown theme.
 """
     },
@@ -179,7 +181,7 @@ CRITICAL COMPOSITION REQUIREMENTS:
 Role
 You are a world-class designer specializing in luxury Chinese New Year e-card designs with extreme macro photography aesthetics. Your goal is to create intimate, magical, and culturally respectful designs.
 Style & Aesthetic
-A luxurious Chinese New Year e-card design, extreme macro photography style. A close-up view of a lit golden sparkler (bengal light) burning intensely. The core is molten gold. Branching, crystalline golden sparks fly intensely outwards and upwards, creating a feathery, organic pattern of light. The very tips of the branching sparks terminate in tiny, soft glowing pearl-like spheres before fading, creating a magical, jewel-like effect. The background is a dark, rich, blurred bokeh of deep reds and gold lights, very intimate and warm. The year "2026" is subtly formed by the trailing light of the sparkler. The feeling is personal joy and holding magic in one's hands.
+A luxurious Chinese New Year e-card design, extreme macro photography style. A close-up view of a lit golden sparkler (bengal light) burning intensely. The core is molten gold. Branching, crystalline golden sparks fly intensely outwards and upwards, creating a feathery, organic pattern of light. The very tips of the branching sparks terminate in tiny, soft glowing pearl-like spheres before fading, creating a magical, jewel-like effect. The background is a dark, rich, blurred bokeh of deep reds and gold lights, very intimate and warm. The year "2026" is subtly formed by the trailing light of the sparkler. The feeling is personal joy and holding happiness in one's hands.
 CRITICAL COMPOSITION REQUIREMENTS:
 - The image must be EDGE-TO-EDGE. NO white borders, NO margins, NO frames, NO physical card edges visible.
 - The design must fill 100% of the canvas from edge to edge.
@@ -225,6 +227,48 @@ def get_available_topics(country: str):
 
 def build_final_prompt(country_code, topic_code):
     """Сборка финального промпта для AI"""
+    import json
+    import os
+    
+    # #region agent log
+    DEBUG_LOG_PATH = "/Users/annaleodit/Documents/Code/Culture Card Bot/.cursor/debug.log"
+    try:
+        log_entry = {
+            "sessionId": "debug-session",
+            "runId": "run1",
+            "hypothesisId": "C",
+            "location": "text_content.py:227",
+            "message": "build_final_prompt ENTRY",
+            "data": {"country_code": country_code, "topic_code": topic_code},
+            "timestamp": 0
+        }
+        with open(DEBUG_LOG_PATH, "a", encoding="utf-8") as f:
+            f.write(json.dumps(log_entry) + "\n")
+    except: pass
+    # #endregion
+    
+    # ВАЛИДАЦИЯ входных параметров (гипотеза C)
+    if country_code not in COUNTRIES:
+        raise ValueError(f"Invalid country_code: {country_code}")
+    if topic_code not in TOPICS:
+        raise ValueError(f"Invalid topic_code: {topic_code}")
+    
+    # #region agent log
+    try:
+        avail_topics = get_available_topics(country_code)
+        log_entry = {
+            "sessionId": "debug-session",
+            "runId": "run1",
+            "hypothesisId": "C",
+            "location": "text_content.py:245",
+            "message": "build_final_prompt VALIDATION",
+            "data": {"country": country_code, "topic": topic_code, "available_topics": avail_topics, "is_valid": topic_code in avail_topics},
+            "timestamp": 0
+        }
+        with open(DEBUG_LOG_PATH, "a", encoding="utf-8") as f:
+            f.write(json.dumps(log_entry) + "\n")
+    except: pass
+    # #endregion
     
     # 1. Достаем данные
     c_data = COUNTRY_AESTHETICS.get(country_code, "")

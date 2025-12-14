@@ -1,6 +1,7 @@
 import os
 import logging
 import base64
+import asyncio
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 from dotenv import load_dotenv
@@ -56,20 +57,36 @@ SAFETY_SETTINGS = [
     types.SafetySetting(category="HARM_CATEGORY_DANGEROUS_CONTENT", threshold="BLOCK_LOW_AND_ABOVE"),
 ]
 
+# Таймаут для генерации изображения (60 секунд)
+IMAGE_GENERATION_TIMEOUT = 60
+
+def _generate_image_sync(positive_prompt: str):
+    """Синхронная функция для генерации изображения"""
+    return client.models.generate_content(
+        model=MODEL_NAME,
+        contents=positive_prompt,
+        config=types.GenerateContentConfig(
+            response_modalities=["IMAGE"],
+            safety_settings=SAFETY_SETTINGS,
+            image_config=types.ImageConfig(aspect_ratio="1:1")
+        )
+    )
+
 async def generate_image_bytes(positive_prompt: str) -> BytesIO:
     if not client: return None
     try:
         logging.info(f"🎨 Generating base AI image...")
-        response = client.models.generate_content(
-            model=MODEL_NAME,
-            contents=positive_prompt,
-            config=types.GenerateContentConfig(
-                response_modalities=["IMAGE"],
-                safety_settings=SAFETY_SETTINGS,
-                image_config=types.ImageConfig(aspect_ratio="1:1")
-            )
+        
+        # Запускаем генерацию в отдельном потоке с таймаутом
+        loop = asyncio.get_event_loop()
+        response = await asyncio.wait_for(
+            loop.run_in_executor(None, _generate_image_sync, positive_prompt),
+            timeout=IMAGE_GENERATION_TIMEOUT
         )
-        if not response.candidates or not response.candidates[0].content.parts: return None
+        
+        if not response.candidates or not response.candidates[0].content.parts: 
+            logging.warning("No candidates or parts in response")
+            return None
 
         image_bytes = None
         for part in response.candidates[0].content.parts:
@@ -78,6 +95,9 @@ async def generate_image_bytes(positive_prompt: str) -> BytesIO:
                 break
         
         return BytesIO(image_bytes) if image_bytes else None
+    except asyncio.TimeoutError:
+        logging.error(f"⏱️ Timeout: Image generation exceeded {IMAGE_GENERATION_TIMEOUT} seconds")
+        return None
     except Exception as e:
         logging.error(f"Generate Error: {e}")
         return None
