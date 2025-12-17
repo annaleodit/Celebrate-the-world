@@ -2,6 +2,10 @@ import logging
 import asyncio
 import aiosqlite
 import json
+import os
+import sys
+import random
+from pathlib import Path
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
@@ -37,7 +41,10 @@ def debug_log(location, message, data, hypothesis_id=None):
 # #endregion
 
 # --- SETUP ---
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 bot = Bot(token=config.BOT_TOKEN)
 dp = Dispatcher()
 
@@ -84,17 +91,47 @@ def make_inline_kb(items: dict, prefix: str, cols=2, add_cancel=False):
             row.append(InlineKeyboardButton(text=btn_text, callback_data=f"{prefix}:{key}"))
         builder.append(row)
     if add_cancel:
-        builder.append([InlineKeyboardButton(text="В начало", callback_data="cancel")])
+        builder.append([InlineKeyboardButton(text="🏠 В начало", callback_data="cancel")])
+    return InlineKeyboardMarkup(inline_keyboard=builder)
+
+def make_topics_kb(filtered_topics: dict, country_code: str):
+    """Создает клавиатуру с темами и кнопкой 'Мне повезет' по 2 в ряд"""
+    builder = []
+    keys = list(filtered_topics.keys())
+    cols = 2
+    
+    # Создаем строки с темами
+    for i in range(0, len(keys), cols):
+        row = []
+        for key in keys[i:i + cols]:
+            btn_text = filtered_topics[key]["btn"]
+            row.append(InlineKeyboardButton(text=btn_text, callback_data=f"topic:{key}"))
+        builder.append(row)
+    
+    # Добавляем "Мне повезет" в последнюю строку, если там есть место, иначе в новую строку
+    if builder and len(builder[-1]) < cols:
+        # Есть место в последней строке - добавляем туда
+        builder[-1].append(InlineKeyboardButton(text="🍀 Мне повезет!", callback_data=f"lucky_topic:{country_code}"))
+    else:
+        # Нет места или builder пуст - создаем новую строку
+        builder.append([InlineKeyboardButton(text="🍀 Мне повезет!", callback_data=f"lucky_topic:{country_code}")])
+    
+    # Добавляем кнопку "В начало"
+    builder.append([InlineKeyboardButton(text="🏠 В начало", callback_data="cancel")])
+    
     return InlineKeyboardMarkup(inline_keyboard=builder)
 
 # --- HANDLERS: START & FLOW ---
 
 @dp.message(CommandStart())
 async def cmd_start(message: types.Message, state: FSMContext):
+    # #region agent log
+    debug_log("bot.py:93", "cmd_start ENTRY", {"user_id": message.from_user.id}, None)
+    # #endregion
     await state.clear()
     await add_user(message.from_user.id, message.from_user.username)
     kb = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="🚀 Начать создание", callback_data="start_flow")]])
-    await message.answer("Привет! Нажмите кнопку ниже, чтобы начать создание профессиональной поздравительной открытки.", reply_markup=kb)
+    await message.answer("Приветствуем! Нажмите кнопку ниже, чтобы начать создание поздравительной открытки, учитывающей культурные особенности разных стран!", reply_markup=kb)
 
 @dp.callback_query(F.data == "start_flow")
 async def start_flow(callback: CallbackQuery, state: FSMContext):
@@ -127,50 +164,111 @@ async def country_chosen(callback: CallbackQuery, state: FSMContext):
     tip_text = tc.get_tips(country_code)
     
     await state.set_state(CardGen.choosing_topic)
-    await callback.message.edit_text(f"Выбрано: {tc.COUNTRIES[country_code]}\n\n{tip_text}\n\n👇 **Выберите тему:**", reply_markup=make_inline_kb(filtered_topics, prefix="topic", cols=2, add_cancel=True), parse_mode="Markdown")
+    
+    # Создаем клавиатуру с темами и кнопкой "Мне повезет" по 2 в ряд
+    kb = make_topics_kb(filtered_topics, country_code)
+    
+    await callback.message.edit_text(f"**Выбор страны: {tc.COUNTRIES[country_code]}**\n\n{tip_text}\n\n👇 Выберите тему:", reply_markup=kb, parse_mode="Markdown")
     await callback.answer()
+
+@dp.callback_query(F.data.startswith("lucky_topic:"))
+async def lucky_topic_chosen(callback: CallbackQuery, state: FSMContext):
+    """Обработчик кнопки 'Мне повезет!' - случайный выбор темы"""
+    try:
+        country_code = callback.data.split(":")[1]
+        
+        # Проверяем валидность страны
+        if country_code not in tc.COUNTRIES:
+            await callback.answer("❌ Неверные параметры", show_alert=True)
+            return
+        
+        # Получаем доступные темы для страны
+        avail_topics = tc.get_available_topics(country_code)
+        
+        if not avail_topics:
+            await callback.answer("❌ Нет доступных тем для этой страны", show_alert=True)
+            return
+        
+        # Случайно выбираем тему
+        random_topic = random.choice(avail_topics)
+        
+        # Сохраняем в state: topic="lucky" для отображения, lucky_topic для генерации
+        await state.update_data(country=country_code, topic="lucky", lucky_topic=random_topic)
+        await state.set_state(CardGen.waiting_for_text)
+        
+        # Показываем предпросмотр параметров
+        topic_display = "Бот выберет тему случайным образом, вам точно повезет!"
+        preview_text = (
+            f"📋 Ваш выбор:\n\n"
+            f"🌍 Страна — {tc.COUNTRIES[country_code]}\n"
+            f"🎨 Тема — {topic_display}\n\n"
+            f"---\n\n"
+            f"✍️ Добавьте ваше персональное сообщение!\n\n"
+            f"Отправьте боту текст на английском и он появится на открытке. Например: Happy and Prosperous New Year 2026!\n\n"
+            f"Или выберите \"Использовать шаблон\" и бот сам подберет текст для вас!"
+        )
+        
+        skip_kb = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="📝 Использовать шаблон текста", callback_data="skip_text")],
+            [InlineKeyboardButton(text="🏠 В начало", callback_data="cancel")]
+        ])
+        
+        await callback.message.edit_text(preview_text, reply_markup=skip_kb, parse_mode="Markdown")
+        await callback.answer("🍀 Тема выбрана случайным образом!")
+    except Exception as e:
+        logging.error(f"Ошибка в lucky_topic_chosen: {e}")
+        await callback.answer("❌ Произошла ошибка", show_alert=True)
 
 @dp.callback_query(F.data.startswith("topic:"))
 async def topic_chosen(callback: CallbackQuery, state: FSMContext):
     topic_code = callback.data.split(":")[1]
     # #region agent log
-    debug_log("bot.py:101", "topic_chosen ENTRY", {"topic_code": topic_code}, "A")
+    debug_log("bot.py:133", "topic_chosen ENTRY", {"topic_code": topic_code}, "A")
     # #endregion
     
     state_data = await state.get_data()
     country_code = state_data.get('country')
     
     # #region agent log
-    debug_log("bot.py:106", "topic_chosen STATE BEFORE VALIDATION", {"country": country_code, "topic": topic_code, "full_state": state_data}, "A")
+    debug_log("bot.py:140", "topic_chosen STATE BEFORE VALIDATION", {"country": country_code, "topic": topic_code, "full_state": state_data}, "A")
     # #endregion
     
-    # ВАЛИДАЦИЯ: Проверяем, что тема доступна для выбранной страны (гипотеза A)
-    if country_code:
-        avail_topics = tc.get_available_topics(country_code)
+    # КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Если country отсутствует, это ошибка состояния
+    if not country_code:
         # #region agent log
-        debug_log("bot.py:111", "topic_chosen VALIDATION CHECK", {"country": country_code, "selected_topic": topic_code, "available_topics": avail_topics, "is_valid": topic_code in avail_topics}, "A")
+        debug_log("bot.py:145", "topic_chosen COUNTRY MISSING", {"state_data": state_data}, "A")
         # #endregion
-        
-        if topic_code not in avail_topics:
-            # #region agent log
-            debug_log("bot.py:115", "topic_chosen VALIDATION FAILED", {"country": country_code, "invalid_topic": topic_code, "available_topics": avail_topics}, "A")
-            # #endregion
-            await callback.answer("❌ Эта тема недоступна для выбранной страны", show_alert=True)
-            return
+        await callback.answer("❌ Ошибка: страна не выбрана. Начните заново с /start", show_alert=True)
+        await state.clear()
+        return
     
-    await state.update_data(topic=topic_code)
+    # ВАЛИДАЦИЯ: Проверяем, что тема доступна для выбранной страны (гипотеза A)
+    avail_topics = tc.get_available_topics(country_code)
+    # #region agent log
+    debug_log("bot.py:152", "topic_chosen VALIDATION CHECK", {"country": country_code, "selected_topic": topic_code, "available_topics": avail_topics, "is_valid": topic_code in avail_topics}, "A")
+    # #endregion
+    
+    if topic_code not in avail_topics:
+        # #region agent log
+        debug_log("bot.py:156", "topic_chosen VALIDATION FAILED", {"country": country_code, "invalid_topic": topic_code, "available_topics": avail_topics}, "A")
+        # #endregion
+        await callback.answer("❌ Эта тема недоступна для выбранной страны", show_alert=True)
+        return
+    
+    # Сохраняем ОБА параметра одновременно для надежности
+    await state.update_data(country=country_code, topic=topic_code)
     # #region agent log
     state_data_after = await state.get_data()
-    debug_log("bot.py:122", "topic_chosen STATE AFTER UPDATE", {"state_data": state_data_after}, "A")
+    debug_log("bot.py:165", "topic_chosen STATE AFTER UPDATE", {"state_data": state_data_after}, "A")
     # #endregion
     
     desc = tc.TOPICS[topic_code]["desc"]
     topic_name = tc.TOPICS[topic_code]["btn"]
     
     kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="✅ Продолжить к тексту", callback_data="ask_for_text")],
+        [InlineKeyboardButton(text="✅ Продолжить", callback_data="ask_for_text")],
         [InlineKeyboardButton(text="⬅️ Назад к темам", callback_data="back_to_topics")],
-        [InlineKeyboardButton(text="В начало", callback_data="cancel")]
+        [InlineKeyboardButton(text="🏠 В начало", callback_data="cancel")]
     ])
     await state.set_state(CardGen.confirming_topic)
     await callback.message.edit_text(f"**Выбрана тема:** {topic_name}\n\n{desc}\n\nПерейти к добавлению вашего персонального сообщения?", reply_markup=kb, parse_mode="Markdown")
@@ -198,7 +296,11 @@ async def back_to_topics(callback: CallbackQuery, state: FSMContext):
     filtered_topics = {k: tc.TOPICS[k] for k in avail_topics_keys}
     tip_text = tc.get_tips(country_code)
     await state.set_state(CardGen.choosing_topic)
-    await callback.message.edit_text(f"Выбрано: {tc.COUNTRIES[country_code]}\n\n{tip_text}\n\n👇 **Выберите тему:**", reply_markup=make_inline_kb(filtered_topics, prefix="topic", cols=2, add_cancel=True), parse_mode="Markdown")
+    
+    # Создаем клавиатуру с темами и кнопкой "Мне повезет" по 2 в ряд
+    kb = make_topics_kb(filtered_topics, country_code)
+    
+    await callback.message.edit_text(f"**Выбор страны: {tc.COUNTRIES[country_code]}**\n\n{tip_text}\n\n👇 Выберите тему:", reply_markup=kb, parse_mode="Markdown")
     await callback.answer()
 
 # --- НОВЫЙ ЭТАП: ЗАПРОС ТЕКСТА ---
@@ -220,39 +322,46 @@ async def ask_for_text_action(callback: CallbackQuery, state: FSMContext):
         await state.clear()
         return
     
-    if not topic_code or topic_code not in tc.TOPICS:
+    # Если тема выбрана случайно, пропускаем валидацию темы
+    if topic_code == "lucky":
+        # Валидация не нужна для lucky темы
+        pass
+    elif not topic_code or topic_code not in tc.TOPICS:
         await callback.answer("❌ Ошибка: тема не выбрана", show_alert=True)
         await state.clear()
         return
-    
-    # Финальная проверка соответствия темы и страны
-    avail_topics = tc.get_available_topics(country_code)
-    if topic_code not in avail_topics:
-        # #region agent log
-        debug_log("bot.py:210", "ask_for_text VALIDATION FAILED", {"country": country_code, "invalid_topic": topic_code, "available_topics": avail_topics}, "B")
-        # #endregion
-        await callback.answer("❌ Тема не соответствует выбранной стране", show_alert=True)
-        await state.clear()
-        return
+    else:
+        # Финальная проверка соответствия темы и страны
+        avail_topics = tc.get_available_topics(country_code)
+        if topic_code not in avail_topics:
+            # #region agent log
+            debug_log("bot.py:297", "ask_for_text VALIDATION FAILED", {"country": country_code, "invalid_topic": topic_code, "available_topics": avail_topics}, "B")
+            # #endregion
+            await callback.answer("❌ Тема не соответствует выбранной стране", show_alert=True)
+            await state.clear()
+            return
     
     # Показываем предпросмотр выбранных параметров
+    # Проверяем, выбрана ли тема случайным образом (помечаем специальным значением)
+    is_lucky = topic_code == "lucky"
+    topic_display = "Бот выберет тему случайным образом, вам точно повезет!" if is_lucky else tc.TOPICS[topic_code]['btn']
+    
     preview_text = (
-        f"📋 **Предпросмотр параметров:**\n\n"
-        f"🌍 Страна: {tc.COUNTRIES[country_code]}\n"
-        f"🎨 Тема: {tc.TOPICS[topic_code]['btn']}\n\n"
+        f"📋 Ваш выбор:\n\n"
+        f"🌍 Страна — {tc.COUNTRIES[country_code]}\n"
+        f"🎨 Тема — {topic_display}\n\n"
         f"---\n\n"
-        f"✍️ **Добавьте ваше персональное сообщение.**\n\n"
-        f"Отправьте текст, который должен появиться на открытке (например, 'С Новым годом от [Название компании]').\n"
-        f"Для лучшего вида сохраняйте текст кратким!\n\n"
-        f"*Или нажмите Пропустить ниже.*"
+        f"✍️ Добавьте ваше персональное сообщение!\n\n"
+        f"Отправьте боту текст на английском и он появится на открытке. Например: Happy and Prosperous New Year 2026!\n\n"
+        f"Или нажмите Пропустить и бот сам подберет текст для вас!"
     )
     
     await state.set_state(CardGen.waiting_for_text)
     
     # Кнопки: Пропустить и В начало
     skip_kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="⏩ Пропустить текст и создать", callback_data="skip_text")],
-        [InlineKeyboardButton(text="В начало", callback_data="cancel")]
+        [InlineKeyboardButton(text="📝 Использовать шаблон текста", callback_data="skip_text")],
+        [InlineKeyboardButton(text="🏠 В начало", callback_data="cancel")]
     ])
     
     await callback.message.edit_text(preview_text, reply_markup=skip_kb, parse_mode="Markdown")
@@ -264,39 +373,60 @@ async def perform_generation(message: types.Message, state: FSMContext, user_tex
     """Общая функция для генерации и отправки, вызывается из двух хэндлеров ниже."""
     data = await state.get_data()
     # #region agent log
-    debug_log("bot.py:159", "perform_generation ENTRY", {"state_data": data, "user_text_length": len(user_text) if user_text else 0}, "B")
+    debug_log("bot.py:263", "perform_generation ENTRY", {"state_data": data, "user_text_length": len(user_text) if user_text else 0}, "B")
     # #endregion
     
     country_code = data.get('country')
     topic_code = data.get('topic')
     
-    # #region agent log
-    debug_log("bot.py:165", "perform_generation BEFORE VALIDATION", {"country": country_code, "topic": topic_code}, "B")
-    # #endregion
-    
-    # ВАЛИДАЦИЯ: Проверяем соответствие topic и country перед генерацией (гипотеза B)
-    if country_code and topic_code:
-        avail_topics = tc.get_available_topics(country_code)
-        # #region agent log
-        debug_log("bot.py:171", "perform_generation VALIDATION CHECK", {"country": country_code, "topic": topic_code, "available_topics": avail_topics, "is_valid": topic_code in avail_topics}, "B")
-        # #endregion
-        
-        if topic_code not in avail_topics:
-            # #region agent log
-            debug_log("bot.py:175", "perform_generation VALIDATION FAILED", {"country": country_code, "invalid_topic": topic_code, "available_topics": avail_topics}, "B")
-            # #endregion
-            await message.answer(
-                f"⚠️ **Ошибка валидации**\n\n"
-                f"Тема '{tc.TOPICS.get(topic_code, {}).get('btn', topic_code)}' недоступна для страны {tc.COUNTRIES.get(country_code, country_code)}.\n"
-                f"Пожалуйста, начните заново командой /start"
-            )
+    # Если тема выбрана случайно, используем реальную тему для генерации
+    if topic_code == "lucky":
+        topic_code = data.get('lucky_topic')
+        if not topic_code:
+            await message.answer("❌ Ошибка: случайная тема не была выбрана. Начните заново с /start")
             await state.clear()
             return
+    
+    # #region agent log
+    debug_log("bot.py:370", "perform_generation BEFORE VALIDATION", {"country": country_code, "topic": topic_code}, "B")
+    # #endregion
+    
+    # КРИТИЧЕСКАЯ ПРОВЕРКА: Оба параметра обязательны
+    if not country_code or not topic_code:
+        # #region agent log
+        debug_log("bot.py:275", "perform_generation MISSING PARAMS", {"country": country_code, "topic": topic_code}, "B")
+        # #endregion
+        await message.answer(
+            f"⚠️ **Ошибка: отсутствуют параметры**\n\n"
+            f"Страна: {'выбрана' if country_code else 'НЕ выбрана'}\n"
+            f"Тема: {'выбрана' if topic_code else 'НЕ выбрана'}\n\n"
+            f"Пожалуйста, начните заново командой /start"
+        )
+        await state.clear()
+        return
+    
+    # ВАЛИДАЦИЯ: Проверяем соответствие topic и country перед генерацией (гипотеза B)
+    avail_topics = tc.get_available_topics(country_code)
+    # #region agent log
+    debug_log("bot.py:287", "perform_generation VALIDATION CHECK", {"country": country_code, "topic": topic_code, "available_topics": avail_topics, "is_valid": topic_code in avail_topics}, "B")
+    # #endregion
+    
+    if topic_code not in avail_topics:
+        # #region agent log
+        debug_log("bot.py:291", "perform_generation VALIDATION FAILED", {"country": country_code, "invalid_topic": topic_code, "available_topics": avail_topics}, "B")
+        # #endregion
+        await message.answer(
+            f"⚠️ **Ошибка валидации**\n\n"
+            f"Тема '{tc.TOPICS.get(topic_code, {}).get('btn', topic_code)}' недоступна для страны {tc.COUNTRIES.get(country_code, country_code)}.\n"
+            f"Пожалуйста, начните заново командой /start"
+        )
+        await state.clear()
+        return
     
     max_retries = 2
     
     # Информируем пользователя о начале процесса
-    status_msg = await message.answer("🎨 Создаю вашу профессиональную открытку... Это включает генерацию AI и графическую композицию. Пожалуйста, подождите (примерно 15-20 сек)...")
+    status_msg = await message.answer("🎨 Создаю вашу открытку с помощью AI и с учетом культурных особенностей страны... Пожалуйста, подождите 15-20 секунд.")
     
     # 1. Генерация AI картинки с retry
     # #region agent log
@@ -355,7 +485,7 @@ async def perform_generation(message: types.Message, state: FSMContext, user_tex
         return
 
     # 2. Сборка финальной открытки (Холст + AI + Текст + Рамка)
-    await status_msg.edit_text("🖌️ Компоную финальный дизайн и применяю золотую рамку...")
+    # Убрали сообщение про компоновку - оно мелькает слишком быстро
     
     try:
         final_card_io = await ai_service.compose_final_card(ai_image_io, user_text)
@@ -375,9 +505,11 @@ async def perform_generation(message: types.Message, state: FSMContext, user_tex
         input_file = BufferedInputFile(file_bytes, filename="greeting_card.jpg")
         
         caption = (
-            f"Вот ваша профессиональная открытка для {tc.COUNTRIES[data['country']]}!\n\n"
-            f"Эта открытка была создана с помощью @culture_card_bot\n\n"
-            f"Нажмите /start, чтобы создать еще одну."
+            f"Ваша открытка готова!\n"
+            f"Страна получателя: {tc.COUNTRIES[data['country']]}!\n"
+            f"Нажмите /start, чтобы начать процесс заново.\n\n"
+            f"---\n\n"
+            f"🪄 Эта открытка была создана с помощью @culture_card_bot"
         )
         
         # Сохраняем страну для быстрого создания еще одной открытки
@@ -390,14 +522,16 @@ async def perform_generation(message: types.Message, state: FSMContext, user_tex
         
         await status_msg.delete()
         await bot.send_photo(chat_id=message.chat.id, photo=input_file, caption=caption, reply_markup=restart_kb)
+        
+        # НЕ очищаем state сразу - он нужен для кнопки "Создать еще одну"
+        # State будет очищен при следующем /start или в create_another
     else:
         await status_msg.edit_text(
             "⚠️ **Ошибка при создании открытки**\n\n"
             "Не удалось собрать финальную композицию.\n"
             "Попробуйте позже или начните заново командой /start"
         )
-    
-    await state.clear()
+        await state.clear()
 
 # Хэндлер 1: Пользователь прислал текст
 @dp.message(CardGen.waiting_for_text, F.text)
@@ -435,7 +569,7 @@ async def create_another_action(callback: CallbackQuery, state: FSMContext):
         country_code = parts[1]
         
         # #region agent log
-        debug_log("bot.py:300", "create_another ENTRY", {"country_code": country_code}, "E")
+        debug_log("bot.py:427", "create_another ENTRY", {"country_code": country_code}, "E")
         # #endregion
         
         # Проверяем валидность страны
@@ -447,7 +581,7 @@ async def create_another_action(callback: CallbackQuery, state: FSMContext):
         await state.update_data(country=country_code, topic=None)
         # #region agent log
         state_data = await state.get_data()
-        debug_log("bot.py:312", "create_another STATE AFTER UPDATE", {"state_data": state_data}, "E")
+        debug_log("bot.py:447", "create_another STATE AFTER UPDATE", {"state_data": state_data}, "E")
         # #endregion
         await state.set_state(CardGen.choosing_topic)
         
@@ -456,9 +590,14 @@ async def create_another_action(callback: CallbackQuery, state: FSMContext):
         filtered_topics = {k: tc.TOPICS[k] for k in avail_topics_keys}
         tip_text = tc.get_tips(country_code)
         
-        await callback.message.edit_text(
-            f"Выбрано: {tc.COUNTRIES[country_code]}\n\n{tip_text}\n\n👇 **Выберите тему:**",
-            reply_markup=make_inline_kb(filtered_topics, prefix="topic", cols=2, add_cancel=True),
+        # Создаем клавиатуру с темами и кнопкой "Мне повезет" по 2 в ряд
+        kb = make_topics_kb(filtered_topics, country_code)
+        
+        # ИСПРАВЛЕНИЕ: Нельзя редактировать фото через edit_text()
+        # Просто отправляем новое текстовое сообщение с выбором тем
+        await callback.message.answer(
+            f"**Выбор страны: {tc.COUNTRIES[country_code]}**\n\n{tip_text}\n\n👇 Выберите тему:",
+            reply_markup=kb,
             parse_mode="Markdown"
         )
         await callback.answer()
@@ -500,9 +639,32 @@ async def cmd_broadcast(message: types.Message):
             await msg.edit_text(f"✅ Рассылка завершена. Отправлено {count} пользователям.")
 
 async def main():
-    await init_db()
-    await bot.delete_webhook(drop_pending_updates=True)
-    await dp.start_polling(bot)
+    """Основная функция запуска бота"""
+    try:
+        await init_db()
+        await bot.delete_webhook(drop_pending_updates=True)
+        logging.info("🚀 Бот запущен и готов к работе")
+        await dp.start_polling(bot, handle_as_tasks=True)
+    except asyncio.CancelledError:
+        logging.info("Получен сигнал остановки...")
+    except Exception as e:
+        logging.error(f"Ошибка в main(): {e}", exc_info=True)
+        raise
+    finally:
+        logging.info("Завершаю работу бота...")
+        try:
+            await bot.session.close()
+        except Exception as e:
+            logging.error(f"Ошибка при закрытии сессии: {e}")
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        # asyncio.run() правильно обрабатывает SIGINT и SIGTERM
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        logging.info("Получен KeyboardInterrupt - завершаю работу")
+    except Exception as e:
+        logging.error(f"Критическая ошибка: {e}", exc_info=True)
+        sys.exit(1)
+    finally:
+        logging.info("Бот завершил работу")

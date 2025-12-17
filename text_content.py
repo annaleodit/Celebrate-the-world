@@ -5,10 +5,10 @@
 
 # --- CONSTANTS ---
 COUNTRIES = {
-    "uae": "🇦🇪 UAE",
-    "ksa": "🇸🇦 Saudi Arabia",
-    "india": "🇮🇳 India",
-    "china": "🇨🇳 China"
+    "uae": "🇦🇪 ОАЭ",
+    "ksa": "🇸🇦 Саудовская Аравия",
+    "india": "🇮🇳 Индия",
+    "china": "🇨🇳 Китай"
 }
 
 # --- PROMPT PARTS ---
@@ -58,22 +58,21 @@ COUNTRY_AESTHETICS = {
 # --- TOPICS (FINALIZED PROMPTS) ---
 TOPICS = {
     "time": {
-        "btn": "🕰 Почти полночь",
-        "desc": "A sophisticated celestial-themed illustration featuring '2026' formed by glowing constellations. Best for: Business Partners & Visionaries.",
+        "btn": "🌌 Космос",
+        "desc": "Динамичный футуризм с текущим золотом и голографической фольгой. Космические вихри энергии — символ безграничных возможностей и элегантного прогресса.",
         "prompt": """
-Role
-You are a world-class illustrator specializing in sophisticated, celestial-themed luxury art. Your goal is to create a precise, elegant, and mystical geometric illustration featuring high-contrast metallics and glowing elements.
-Style & Aesthetic: High-end luxury ecard design. The look must simulate metallic hot-foil stamping (Gold, Silver, Rose Gold) on premium textured matte paper. 
-IMPORTANT: The background color of the paper MUST match the 'Color Palette' defined in the Country Aesthetic section.
-The vibe is minimalist, geometric, and expensive.
-Scene Description: A composition featuring a large, minimalist clock face with a fine metallic rim.
-CRITICAL: The clock hands position must be as described. ONlY TWO HANDS in the clock. The shorter hand facing exactly upright, the longer hand - 5 degrees left so that they are indicating 11:55 (five minutes to midnight).
-The year "2026" is in the bottom part of the card in a sophisticated serif or script typeface. Around the 2026 stylized orbital rings and small planetary spheres sweep upwards in ellipses, intertwining with the clock to create a seamless celestial countdown theme.
+Role: Conceptual Luxury Artist & E-card Designer.
+
+Aesthetic & Mood: Visualize a fusion of Dynamic Futurism and Fluid Luxury. The feeling should be one of limitless possibility, rapid evolution, and elegant, unstoppable progress. Think celestial motion rendered with opulent materials. The canvas is a deep, rich matte surface. The primary visual elements are a interplay of molten, flowing liquid gold and shifting, iridescent holographic foil that catches light like nebula dust.
+
+Scene Description: Create an abstract celestial composition that embodies movement into the future. Think of a vortex, a sweeping, organic flow of energy—a cosmic current or pathway made of curving light trails, stardust, and orbital lines that draws the eye forward.
+Integrate abstract, cosmic forms within this flow. These could be stylized planetary spheres, shimmering dust clouds, or geometric light or star constructs, all caught in the dynamic current. Orbital rings and small planetary spheres sweep upwards in ellipses, intertwining with each other. Avoid mechanical gears; focus on fluid, organic celestial curves.
+The year "2026" should be integrated into the design. It shouldn't just be placed; it should emerge from or be formed by the flowing gold, stardust, or holographic trails, using a sleek, contemporary display typeface that feels like part of the movement. However it should be readable and not fully merged.
 """
     },
     "fireworks": {
-        "btn": "🎆 Салют и арабески",
-        "desc": "Clean, expensive, and structurally precise geometric fireworks. Best for: Mixed Groups & Locals.",
+        "btn": "🎆 Геометрия света",
+        "desc": "Абстрактный узор, напоминающий салют, выполненный чистыми золотыми линиями на темном фоне.",
         "prompt": """
 Role
 You are a high-end graphic designer specializing in luxury vector illustrations and typography for premium greeting cards. Your aesthetic is clean, expensive, structurally precise, and influenced by modern geometric patterns and high-contrast metallic textures.
@@ -86,20 +85,20 @@ The composition consists of intersecting fine lines, polygons, and crystalline f
 """
     },
     "falcon": {
-        "btn": "🦅 Ночной сокол",
-        "desc": "A high-end e-card featuring a geometric falcon and '2026' as a constellation. Best for: Locals & VIPs.",
+        "btn": "🦅 Сквозь звезды",
+        "desc": "Сияющий силуэт сокола на фоне ночного неба. Символ силы, статуса и высоких целей.",
         "prompt": """
 Role
-You are a premier digital artist creating high-end e-cards with a focus on celestial energy and "digital luxury." Your style combines geometric forms with atmospheric, volumetric lighting effects to create immersive, glowing scenes.
+You are a premier digital artist creating high-end e-cards with a focus on celestial energy and "digital luxury." Your style combines intricate geometric forms with atmospheric, volumetric lighting effects to create immersive, glowing scenes that feel expensive and advanced.
 Style & Aesthetic
-The overall impression is one of celestial energy and digital luxury. The design is composed of golden and bronze beams, connecting points, and shimmering stardust particles on background that emit a warm, volumetric glow against a deep dark, nebular void background (use the Country Aesthetic palette for the void color tone). The light blooms at intersections, creating an atmospheric effect.
+The overall impression is one of kinetic celestial energy and opulent digital craftsmanship. The design is composed of golden and warm bronze beams, interconnected glowing nodes, and shimmering stardust particles. These elements emit a powerful, warm volumetric glow against a deep dark, nebular void background (use the Country Aesthetic palette for the void color tone). The light blooms intensely at intersections and along edges, creating a soft, atmospheric haze.
 Scene Description
-A high-end e-card featuring a geometric falcon soaring the air in the left or middle part of the image and the year '2026' rendered as a glowing constellation of light.
+Visualize a magnificent, faceted geometric falcon, constructed as if from interwoven golden light beams and polished bronze filigree, soaring dynamically across the middle-left of the frame. It is a creature of pure energy. As it flies, it leaves a turbulent, sparkling wake of light trails and data particles. This wake flows across the scene and coalesces on the right side to forge the glowing constellation of the year '2026'. The numbers are formed by dense clusters of stars and geometric light connections, appearing as a stellar blueprint brought to life by the falcon's passage.
 """
     },
     "mandala": {
-        "btn": "🌼 Мандала",
-        "desc": "A minimalist New Year 2026 digital design featuring a unique mandala design. Best for: India.",
+        "btn": "🌼 Цветение",
+        "desc": "Лаконичная открытка с крупным рельефным орнаментом в спокойных, приятных глазу тонах.",
         "prompt": """
 Role
 You are a world-class designer specializing in luxury full-screen digital artwork with Indian design aesthetics. Your goal is to create sophisticated, elegant, and culturally respectful designs.
@@ -113,8 +112,8 @@ CRITICAL COMPOSITION REQUIREMENTS:
 """
     },
     "modern_royal": {
-        "btn": "👑 Королевский стиль",
-        "desc": "A hyper-luxurious, high-end New Year 2026 digital design designed by Sabyasachi and Manish Malhotra. Best for: India.",
+        "btn": "👑 Сокровища",
+        "desc": "Глубокие насыщенные цвета, текстура дорогой ткани и золотое сияние. Традиционно и торжественно.",
         "prompt": """
 Role
 You are a world-class designer specializing in hyper-luxurious full-screen digital artwork with Indian royal aesthetics. Your goal is to create opulent, majestic, and culturally sophisticated designs.
@@ -128,8 +127,8 @@ CRITICAL COMPOSITION REQUIREMENTS:
 """
     },
     "urban_vibes": {
-        "btn": "🌃 Вечеринка в городе",
-        "desc": "A luxurious, high-end New Year digital design embodying a sophisticated urban celebration. Best for: India.",
+        "btn": "🌃 Огни мегаполиса",
+        "desc": "Динамичный вид ночного города с яркими вспышками. Для тех, кто ценит современный ритм жизни.",
         "prompt": """
 Role
 You are a world-class designer specializing in luxury urban-themed full-screen digital artwork. Your goal is to create sophisticated, energetic, and aspirational designs.
@@ -143,8 +142,8 @@ CRITICAL COMPOSITION REQUIREMENTS:
 """
     },
     "prosperity": {
-        "btn": "🌸 Процветание",
-        "desc": "Elegant festive design featuring a plum blossom branch in rich red and gold. Best for: China.",
+        "btn": "🌸 Ветвь удачи",
+        "desc": "Классическая цветущая ветвь в красных и золотых тонах. Традиционный символ весны и обновления.",
         "prompt": """
 Role
 You are a world-class designer specializing in luxury Chinese New Year e-card designs. Your goal is to create elegant, festive, and culturally respectful designs.
@@ -158,8 +157,8 @@ CRITICAL COMPOSITION REQUIREMENTS:
 """
     },
     "abundance": {
-        "btn": "🐟 Изобилие",
-        "desc": "Hyper-luxurious Chinese New Year 2026 e-card with 'Modern China Vibe' featuring Cyber-Koi fish. Best for: China.",
+        "btn": "🐟 Поток изобилия",
+        "desc": "Современная цифровая интерпретация карпов кои. Яркий и энергичный образ движения вперед.",
         "prompt": """
 Role
 You are a world-class designer specializing in hyper-luxurious Chinese New Year e-card designs with modern digital aesthetics. Your goal is to create sophisticated, fluid, and culturally respectful designs.
@@ -175,13 +174,13 @@ CRITICAL COMPOSITION REQUIREMENTS:
 """
     },
     "light_happiness": {
-        "btn": "✨ Свет и радость",
-        "desc": "Luxurious Chinese New Year e-card with extreme macro photography of a lit golden sparkler. Best for: China.",
+        "btn": "✨ Искры",
+        "desc": "Вариации на тему бенгальского огня. Теплая, уютная и очень личная атмосфера праздника.",
         "prompt": """
 Role
 You are a world-class designer specializing in luxury Chinese New Year e-card designs with extreme macro photography aesthetics. Your goal is to create intimate, magical, and culturally respectful designs.
 Style & Aesthetic
-A luxurious Chinese New Year e-card design, extreme macro photography style. A close-up view of a lit golden sparkler (bengal light) burning intensely. The core is molten gold. Branching, crystalline golden sparks fly intensely outwards and upwards, creating a feathery, organic pattern of light. The very tips of the branching sparks terminate in tiny, soft glowing pearl-like spheres before fading, creating a magical, jewel-like effect. The background is a dark, rich, blurred bokeh of deep reds and gold lights, very intimate and warm. The year "2026" is subtly formed by the trailing light of the sparkler. The feeling is personal joy and holding happiness in one's hands.
+A striking, full-frame macro shot capturing the essence of New Year joy. Close-up on a reaction of golden light and heat, rendered with hyper-realistic optical physics. The focus is on the intricate dance of sparks which look like tiny comets with pearl-like heads, leaving trails of warm exposure light. The background is a luxurious, blurry city, bokeh and wash of dark wine-reds and deep shadow, making the gold pop with intense contrast. The image is borderless and cinematic. The year "2026" is written in the air with long-exposure light painting, continuing the spark pattern. Stylish, festive, non-traditional, masterpiece quality. The feeling is personal joy and holding happiness in one's hands.
 CRITICAL COMPOSITION REQUIREMENTS:
 - The image must be EDGE-TO-EDGE. NO white borders, NO margins, NO frames, NO physical card edges visible.
 - The design must fill 100% of the canvas from edge to edge.
@@ -197,19 +196,19 @@ def get_tips(country: str) -> str:
     """Возвращает экспертный совет на основе страны"""
     # UAE
     if country == "uae":
-        return "💡 **Рекомендации:** Для эмиратцев фокус на Видении и Процветании.\n😎 **Профессиональный совет:** 'Сокол' или 'Почти полночь' - отличный уважительный выбор. Избегайте упоминания вечеринок или Рождества, придерживайтесь Поздравлений с сезоном или Новым годом."
+        return "💡 Рекомендации:\n- ОАЭ это котел культур. В Дубае символы католического рождества повсюду. Но в других Эмиратах их гораздо меньше или нет вовсе.\n- В поздравлениях избегайте упоминания Рождества и религиозных символов, придерживайтесь поздравлений с Новым годом.\n- Этот бот сейчас умеет делать открытки для Эмирати или смешанных групп. Но помните, что в ОАЭ живет огромное число экспатов и они могут иметь свои особые традиции. Например, большинство Филиппинцев празднуют рождество 25-го декабря, также как европейцы или американцы, но со своими атрибутами и символами."
 
     # KSA
     if country == "ksa":
-        return "💡 **Рекомендации:** Офисы модернизируются, но этикет остается консервативным.\n😎 **Профессиональный совет:** Темы 'Почти полночь' или 'Ночной сокол' - безопасный, премиальный выбор для ваших поздравлений. Избегайте упоминания вечеринок или Рождества, придерживайтесь Поздравлений с сезоном или Новым годом."
+        return "💡 Рекомендации:\n- Саудовская Аравия - страна глубоких исламских традиций, но быстрых перемен. Рождество здесь не празднуют, и поздравлять с ним местных партнеров нельзя.\n- 1 января не является официальным народным праздником, но в бизнес-среде и крупных городах к нему относятся лояльно, часто в контексте фестиваля Riyadh Season.\n- Для поздравления используйте нейтральные формулировки про Новый год без религиозного подтекста и упоминаний или изображений алкоголя."
 
     # India
     if country == "india":
-        return "💡 **Рекомендации:** Индийская культура ценит роскошь и традиции.\n😎 **Профессиональный совет:** Темы 'Мандала', 'Королевский стиль' или 'Вечеринка в городе' - отличный выбор для индийских получателей. Все темы учитывают культурные особенности и безопасность."
+        return "💡 Рекомендации:\n- Западный Новый год отмечают в основном в крупных городах и бизнес среде.\n- В каждом штате Индии отмечают свой индуистский или другой традиционный новый год, спросите вашего коллегу из какого он штата и какой праздник для него - Новый год. Не забудьте поздравить его в соответствующую дату.\n- Индия - невероятно разнообразная в языковом смысле страна, поэтому мы рекомендуем ограничиться английским, так как не известно, владеет ли ваш коллега хинди, тамильским или керала."
 
     # China
     if country == "china":
-        return "💡 **Рекомендации:** В Китае Новый год — это второстепенный праздник по сравнению с Лунным новым годом. В 2026 году он выпадает на 17 февраля, а праздники продлятся с 16 февраля до 3 марта. Обязательно поздравьте ваших коллег с Лунным новым годом.\n💡 Новый год в западном стиле отмечают только в крупных городах.\n💡 Не поздравляйте ваших китайских коллег с Рождеством, даже если они проживают на западе.\n😎 **Профессиональный совет:** Темы 'Процветание', 'Изобилие' или 'Свет и радость' - отличный выбор для китайских получателей. Все темы учитывают культурные особенности и безопасность."
+        return "💡 Рекомендации:\n- В Китае Новый год это второстепенный праздник по сравнению с Лунным новым годом. В 2026 году Лунный новый год выпадает на 17 февраля, а праздники продлятся с 16 февраля до 3 марта. Обязательно поздравьте ваших коллег с Лунным новым годом.\n- Новый год в западном стиле отмечают только в крупных городах.\n- Не поздравляйте ваших китайских коллег с Рождеством, даже если они проживают на западе."
 
     return "💡 **Совет:** Помните золотое правило: Будьте уважительны, исключайте изображения алкоголя и религиозные элементы, фокусируйтесь на общих ценностях, таких как процветание, свет и тепло."
 
