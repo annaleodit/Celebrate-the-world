@@ -23,9 +23,20 @@ import text_content as tc
 import ai_service
 
 # #region agent log
-DEBUG_LOG_PATH = "/Users/annaleodit/Documents/Code/Culture Card Bot/.cursor/debug.log"
+# Debug logging (опционально, только для локальной разработки)
+DEBUG_LOG_ENABLED = os.getenv("DEBUG_LOG_ENABLED", "false").lower() == "true"
+DEBUG_LOG_PATH = os.path.join(os.getcwd(), ".cursor", "debug.log") if DEBUG_LOG_ENABLED else None
+
 def debug_log(location, message, data, hypothesis_id=None):
+    """Логирование отладочной информации (только если включено)"""
+    if not DEBUG_LOG_ENABLED or not DEBUG_LOG_PATH:
+        return
     try:
+        # Создаем директорию, если её нет
+        log_dir = os.path.dirname(DEBUG_LOG_PATH)
+        if log_dir and not os.path.exists(log_dir):
+            os.makedirs(log_dir, exist_ok=True)
+        
         log_entry = {
             "sessionId": "debug-session",
             "runId": "run1",
@@ -37,7 +48,8 @@ def debug_log(location, message, data, hypothesis_id=None):
         }
         with open(DEBUG_LOG_PATH, "a", encoding="utf-8") as f:
             f.write(json.dumps(log_entry) + "\n")
-    except: pass
+    except Exception:
+        pass  # Игнорируем ошибки логирования
 # #endregion
 
 # --- SETUP ---

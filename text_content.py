@@ -230,20 +230,28 @@ def build_final_prompt(country_code, topic_code):
     import os
     
     # #region agent log
-    DEBUG_LOG_PATH = "/Users/annaleodit/Documents/Code/Culture Card Bot/.cursor/debug.log"
-    try:
-        log_entry = {
-            "sessionId": "debug-session",
-            "runId": "run1",
-            "hypothesisId": "C",
-            "location": "text_content.py:227",
-            "message": "build_final_prompt ENTRY",
-            "data": {"country_code": country_code, "topic_code": topic_code},
-            "timestamp": 0
-        }
-        with open(DEBUG_LOG_PATH, "a", encoding="utf-8") as f:
-            f.write(json.dumps(log_entry) + "\n")
-    except: pass
+    # Debug logging (опционально, только для локальной разработки)
+    DEBUG_LOG_ENABLED = os.getenv("DEBUG_LOG_ENABLED", "false").lower() == "true"
+    if DEBUG_LOG_ENABLED:
+        DEBUG_LOG_PATH = os.path.join(os.getcwd(), ".cursor", "debug.log")
+        try:
+            log_dir = os.path.dirname(DEBUG_LOG_PATH)
+            if log_dir and not os.path.exists(log_dir):
+                os.makedirs(log_dir, exist_ok=True)
+            
+            log_entry = {
+                "sessionId": "debug-session",
+                "runId": "run1",
+                "hypothesisId": "C",
+                "location": "text_content.py:227",
+                "message": "build_final_prompt ENTRY",
+                "data": {"country_code": country_code, "topic_code": topic_code},
+                "timestamp": 0
+            }
+            with open(DEBUG_LOG_PATH, "a", encoding="utf-8") as f:
+                f.write(json.dumps(log_entry) + "\n")
+        except Exception:
+            pass  # Игнорируем ошибки логирования
     # #endregion
     
     # ВАЛИДАЦИЯ входных параметров (гипотеза C)
@@ -253,20 +261,22 @@ def build_final_prompt(country_code, topic_code):
         raise ValueError(f"Invalid topic_code: {topic_code}")
     
     # #region agent log
-    try:
-        avail_topics = get_available_topics(country_code)
-        log_entry = {
-            "sessionId": "debug-session",
-            "runId": "run1",
-            "hypothesisId": "C",
-            "location": "text_content.py:245",
-            "message": "build_final_prompt VALIDATION",
-            "data": {"country": country_code, "topic": topic_code, "available_topics": avail_topics, "is_valid": topic_code in avail_topics},
-            "timestamp": 0
-        }
-        with open(DEBUG_LOG_PATH, "a", encoding="utf-8") as f:
-            f.write(json.dumps(log_entry) + "\n")
-    except: pass
+    if DEBUG_LOG_ENABLED:
+        try:
+            avail_topics = get_available_topics(country_code)
+            log_entry = {
+                "sessionId": "debug-session",
+                "runId": "run1",
+                "hypothesisId": "C",
+                "location": "text_content.py:245",
+                "message": "build_final_prompt VALIDATION",
+                "data": {"country": country_code, "topic": topic_code, "available_topics": avail_topics, "is_valid": topic_code in avail_topics},
+                "timestamp": 0
+            }
+            with open(DEBUG_LOG_PATH, "a", encoding="utf-8") as f:
+                f.write(json.dumps(log_entry) + "\n")
+        except Exception:
+            pass  # Игнорируем ошибки логирования
     # #endregion
     
     # 1. Достаем данные
