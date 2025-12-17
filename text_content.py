@@ -18,7 +18,7 @@ STRICTLY NO ALCOHOL: No wine glasses, champagne flutes, or cocktail shakers. Use
 NO FEMALE REPRESENTATION: To ensure cultural compliance, do not depict human female figures.
 RELIGION: No religious symbols (crosses, angels, saints).
 FOCUS: Primary focus is secular "New Year". STRICTLY NEW YEAR / SEASONAL ONLY. NO Christmas symbols (trees, Santa Claus). Use confetti, golden lights, fireworks.
-TEXT RULES: Do not generate any text, letters, or numbers UNLESS explicitly asked for the year "2026". Apart from "2026", avoid any other text.
+TEXT RULES: Do not generate any text, letters, or numbers UNLESS explicitly asked for it. The year "2026" is allowed. Apart from "2026", NO other text.
 NO GLASSES: MUST NOT use glasses with drinks to avoid confusion with wine only tea and coffee are acceptable.
 HUMAN FIGURES: NO DISTINCT people or hands or other parts of human body. Women MUST be avoided or at least fully covered/abaya when used as silhouettes.
 NO ZODIAK signs, strictly not allowed.
@@ -180,7 +180,7 @@ CRITICAL COMPOSITION REQUIREMENTS:
 Role
 You are a world-class designer specializing in luxury Chinese New Year e-card designs with extreme macro photography aesthetics. Your goal is to create intimate, magical, and culturally respectful designs.
 Style & Aesthetic
-A striking, full-frame macro shot capturing the essence of New Year joy. Close-up on a reaction of golden light and heat, rendered with hyper-realistic optical physics. The focus is on the intricate dance of sparks which look like tiny comets with pearl-like heads, leaving trails of warm exposure light. The background is a luxurious, blurry city, bokeh and wash of dark wine-reds and deep shadow, making the gold pop with intense contrast. The image is borderless and cinematic. The year "2026" is written in the air with long-exposure light painting, continuing the spark pattern. Stylish, festive, non-traditional, masterpiece quality. The feeling is personal joy and holding happiness in one's hands.
+A striking, full-frame macro shot capturing the essence of New Year joy. A macro-lens perspective of a golden effervescence. Imagine a cascade of bioluminescent gold particles and ethereal light ribbons exploding softly against a rich, dark velvet-red void. Close-up on a reaction of golden light and heat, rendered with hyper-realistic optical physics. The focus is on the intricate dance of sparks which look like tiny comets with spark-like heads, leaving trails of warm exposure light. The particles possess a physical weight, looking like molten droplets or floating gold dust. The movement mimics the blooming of a flower or the flow of silk. The background is a luxurious, blurry city, bokeh and wash of dark wine-reds and deep shadow, making the gold pop with intense contrast. The image is borderless and cinematic. The year "2026" is written in the air with long-exposure light painting, continuing the spark pattern. Stylish, festive, non-traditional, masterpiece quality. The feeling is personal joy and holding happiness in one's hands.
 CRITICAL COMPOSITION REQUIREMENTS:
 - The image must be EDGE-TO-EDGE. NO white borders, NO margins, NO frames, NO physical card edges visible.
 - The design must fill 100% of the canvas from edge to edge.
