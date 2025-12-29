@@ -39,8 +39,14 @@ except ValueError:
 raw_database_url = os.getenv("DATABASE_URL")
 if not raw_database_url:
     raise ValueError(
-        "DATABASE_URL не установлен! Установите переменную окружения DATABASE_URL.\n"
-        "Для локальной разработки создайте файл .env с DATABASE_URL=postgresql://user:password@localhost:5432/dbname"
+        "DATABASE_URL не установлен! Установите переменную окружения DATABASE_URL.\n\n"
+        "Для локальной разработки создайте файл .env с:\n"
+        "DATABASE_URL=postgresql://user:password@localhost:5432/dbname\n\n"
+        "Для Render:\n"
+        "1. Если используете render.yaml (Blueprint): убедитесь, что база данных создана\n"
+        "2. Если деплоите вручную: создайте PostgreSQL базу данных на Render и скопируйте\n"
+        "   Internal Database URL в переменную окружения DATABASE_URL вашего Worker сервиса\n"
+        "3. Переменная DATABASE_URL должна быть настроена до запуска бота"
     )
 
 # Конвертируем postgres:// в postgresql:// для asyncpg (Render использует postgres://)
