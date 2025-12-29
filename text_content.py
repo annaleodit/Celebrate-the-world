@@ -8,7 +8,8 @@ COUNTRIES = {
     "uae": "🇦🇪 ОАЭ",
     "ksa": "🇸🇦 Саудовская Аравия",
     "india": "🇮🇳 Индия",
-    "china": "🇨🇳 Китай"
+    "china": "🇨🇳 Китай",
+    "philippines": "🇵🇭 Филиппины"
 }
 
 # --- PROMPT PARTS ---
@@ -48,11 +49,25 @@ NO number 4
 TEXT RULES: You may include the year "2026" and specific festive text mentioned in the prompt (such as "Prosperity in Bloom" or "Prosperous New Year 2026"). Do not generate any other text, letters, or numbers.
 """
 
+GLOBAL_SAFETY_PHILIPPINES = """
+GLOBAL SAFETY PHILIPPINES:
+STRICTLY NO MINIMALISM: The image must look "full" and abundant (Masagana). Avoid large empty negative spaces, which imply poverty.
+SHAPE RULES: Prioritize ROUND shapes (circles, spheres, dots) representing coins and wealth. Avoid sharp triangles or jagged edges unless it's fireworks.
+FOOD RESTRICTIONS: NO sour fruits (lemons, limes) prominent in the foreground (symbolizes "sour" relations). NO empty plates or half-eaten food.
+RELIGION: Parol lanterns (star-shaped) are encouraged for Christmas. Secular "New Year" celebration is preferred.
+ALCOHOL: Champagne glasses and wine ARE ALLOWED and encouraged (celebratory toast).
+TEXT RULES: You may include the year "2026" but NO other text is allowed.
+COLORS: Avoid dominance of BLACK (associated with mourning/Holy Week) unless it is a night sky background for fireworks.
+ANIMALS: No snakes or reptiles.
+PEOPLE: Silhouettes or hands (toasting) are allowed to show connection (high collectivism), but avoid distinct realistic faces to maintain generic card utility.
+"""
+
 COUNTRY_AESTHETICS = {
     "uae": "Aesthetic: 'Future Heritage.' Fusion of hyper-modern architecture and warm golden-hour lighting. Polished glass, steel, and gold textures. Vibe: Limitless ambition, cosmopolitan luxury. Color Palette: Gold, White, Silver, Warm Beige.",
     "ksa": "Aesthetic: Deep, rich, and regal. Blend of historic mud-brick architecture or desert landscapes with sleek modernity. Vibe: Dignity, warmth, hospitality. Color Palette: Sand, Terracotta, Deep Gold, Midnight Blue.",
     "india": "Aesthetic: Rich, luxurious, and culturally sophisticated. Blend of traditional Indian design elements with contemporary luxury. Vibe: Opulent, celebratory, refined. Color Palette: Royal jewel tones (Rani Pink, Midnight Blue, Emerald Green), Gold, Cream, Taupe, Blush Pink.",
-    "china": "Aesthetic: Luxury, modern, festive, focused on future. Focus on prosperity and happiness. Color Palette: Deep red velvet, dark cherry red, gold."
+    "china": "Aesthetic: Luxury, modern, festive, focused on future. Focus on prosperity and happiness. Color Palette: Deep red velvet, dark cherry red, gold.",
+    "philippines": "Aesthetic: 'Tropical Festivity & Abundance.' A vibrant mix of Spanish fiesta warmth and Asian prosperity symbols. Focus on glowing lights and organic abundance. Vibe: Joyful, loud, communal, optimistic, chaotic but warm. Color Palette: Bright Red, Festive Gold, Tangerine Orange, Tropical Green, Violet (Parol light)."
 }
 
 # --- TOPICS (FINALIZED PROMPTS) ---
@@ -187,6 +202,51 @@ CRITICAL COMPOSITION REQUIREMENTS:
 - NO negative space around the design. The background color/texture must extend to all edges.
 - This is a full-screen digital artwork, NOT a photograph of a physical card. The entire canvas IS the design itself.
 """
+    },
+    "fruit_burst": {
+        "btn": "🍇 Фруктовое изобилие",
+        "desc": "Динамичная композиция из 12 фруктов, застывших в полете. Символ процветания и богатства на Новый год.",
+        "prompt": """
+Role: You are a luxury commercial photographer specializing in high-end product photography for premium greeting cards.
+
+A dynamic, luxurious commercial photograph capturing a [Varies: chaotic burst | elegant spiraling upward motion | explosive radial scattering] of fruits for Filipino New Year, in the style of high-end product photography.
+Strictly exactly 12 distinct fruit items are suspended in mid-air, frozen in motion.
+Mandatory items (Must be included these 2):
+One whole large bunch of Grapes (counts as one item).
+A cluster of small Kiat-Kiat (or ponkan) mandarins (counts as one item).
+Variable items (The AI must randomly select another 10 items from this list to complete the set of 12): [Watermelon, Melon, Orange, Red Apple, Green Apple, Yellow Asian Pear, Large Pomelo, Brown Chico, Hairy Red Rambutan, Purple Mangosteen, Sweet Longan cluster, Bright Orange Persimmon, Sugar Apple (Atis), Star Apple (Caimito), Yellow Santol].
+The total number of varieties of fruit must be 12.
+Environment and Lighting Variations: The background is dark and rich, filled with intense bokeh lights. The lighting mood should vary: [Varies: warm amber and gold hues | sparkling champagne tones with silver hints | deep jewel-toned bokeh (ruby, gold, and emerald glints)].
+The fruits are surrounded by dynamic particle effects: [Varies: flying metallic gold ribbons and confetti | exploding gold dust and fine water mist | magical golden sparkler trails and smoke].
+Camera angle: [Varies: Eye-level dramatic shot | Slightly low angle looking up at the explosion | Macro-focus emphasizing textures with shallow depth of field]. No humans.
+CRITICAL COMPOSITION REQUIREMENTS:
+- The image must be EDGE-TO-EDGE. NO white borders, NO margins, NO frames, NO physical card edges visible.
+- The design must fill 100% of the canvas from edge to edge.
+- NO negative space around the design. The background must extend to all edges.
+- This is a full-screen digital artwork, NOT a photograph of a physical card. The entire canvas IS the design itself.
+"""
+    },
+    "light_abstract": {
+        "btn": "✨ Световая абстракция",
+        "desc": "Роскошная абстрактная композиция из размытых световых сфер. Элегантная и праздничная атмосфера.",
+        "prompt": """
+Role: You are a luxury abstract photographer specializing in high-end digital art for premium greeting cards.
+
+A luxurious, abstract macro photograph focusing on defocused light. The composition is devoid of any objects or people, relying solely on light phenomena.
+Visual Elements: The frame is filled with large, soft, out-of-focus spheres of light (bokeh) against a deep, background with lights. Fireworks on the background as if bokeh was close up fireworks lights or could be sparkles. 
+Color Palette Variations [THE AI MUST RANDOMLY SELECT ONE]:
+[Warm Festive]: Rich, warm tones of molten gold, deep amber, burnt orange, and ruby red.
+[Vibrant Mix]: A dynamic mixture of multi-colored festive lights (gold, red, green) overlapping. 
+Composition and Arrangement Variations [THE AI MUST RANDOMLY SELECT ONE]:
+[Dense Network]: A field of overlapping bokeh circles creating a rich tapestry of light.
+[Dynamic Flow]: The bokeh lights are arranged in a diagonal sweep or a spiral motion across the frame.
+Lighting & Style: Extreme shallow depth of field. The lights should appear soft, glowing, and ethereal. The overall feel is premium, modern, and elegant high-end digital art.
+CRITICAL COMPOSITION REQUIREMENTS:
+- The image must be EDGE-TO-EDGE. NO white borders, NO margins, NO frames, NO physical card edges visible.
+- The design must fill 100% of the canvas from edge to edge.
+- NO negative space around the design. The background must extend to all edges.
+- This is a full-screen digital artwork, NOT a photograph of a physical card. The entire canvas IS the design itself.
+"""
     }
 }
 
@@ -210,6 +270,10 @@ def get_tips(country: str) -> str:
     if country == "china":
         return "💡 Рекомендации:\n- В Китае Новый год это второстепенный праздник по сравнению с Лунным новым годом. В 2026 году Лунный новый год выпадает на 17 февраля, а праздники продлятся с 16 февраля до 3 марта. Обязательно поздравьте ваших коллег с Лунным новым годом.\n- Новый год в западном стиле отмечают только в крупных городах.\n- Не поздравляйте ваших китайских коллег с Рождеством, даже если они проживают на западе."
 
+    # Philippines
+    if country == "philippines":
+        return "💡 Рекомендации:\n- Филиппины - страна с самой длинной рождественской традицией в Азии. Рождество здесь начинается в сентябре и длится до января, поэтому поздравления с Рождеством и Новым годом здесь нормальны и приветствуются.\n- Новый год отмечают с особой радостью, часто с шумными фейерверками и обильным застольем с 12 видами фруктов (символ 12 месяцев изобилия).\n- Филиппинцы ценят теплоту и изобилие в поздравлениях. Изображения алкоголя (шампанское, вино) допустимы и даже приветствуются.\n- Важна символика изобилия (Masagana) - избегайте минимализма, предпочитайте яркие, наполненные композиции."
+
     return "💡 **Совет:** Помните золотое правило: Будьте уважительны, исключайте изображения алкоголя и религиозные элементы, фокусируйтесь на общих ценностях, таких как процветание, свет и тепло."
 
 def get_available_topics(country: str):
@@ -220,6 +284,9 @@ def get_available_topics(country: str):
     elif country == "china":
         # Для Китая: prosperity, abundance, light_happiness
         return ["prosperity", "abundance", "light_happiness"]
+    elif country == "philippines":
+        # Для Филиппин: fruit_burst, light_abstract
+        return ["fruit_burst", "light_abstract"]
     else:
         # Для UAE и KSA: time, fireworks, falcon
         return ["time", "fireworks", "falcon"]
@@ -288,6 +355,8 @@ def build_final_prompt(country_code, topic_code):
         safety_protocol = GLOBAL_SAFETY_INDIA
     elif country_code == "china":
         safety_protocol = GLOBAL_SAFETY_CHINA
+    elif country_code == "philippines":
+        safety_protocol = GLOBAL_SAFETY_PHILIPPINES
     else:
         safety_protocol = GLOBAL_SAFETY
     

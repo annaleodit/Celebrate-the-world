@@ -1,4 +1,10 @@
 services:
+  - type: pg
+    name: culture-card-bot-db
+    plan: free
+    databaseName: culture_card_bot
+    user: culture_card_bot_user
+
   - type: worker
     name: culture-card-bot
     env: python
@@ -14,6 +20,10 @@ services:
       - key: DEBUG_LOG_ENABLED
         value: false
         sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: culture-card-bot-db
+          property: connectionString
 
 
 

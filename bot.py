@@ -1,10 +1,12 @@
 import logging
 import asyncio
-import aiosqlite
+import asyncpg
 import json
 import os
 import sys
 import random
+import csv
+import io
 from pathlib import Path
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command, CommandStart
@@ -61,29 +63,153 @@ bot = Bot(token=config.BOT_TOKEN)
 dp = Dispatcher()
 
 # --- DATABASE ---
+# Connection pool для PostgreSQL
+db_pool: asyncpg.Pool = None
+
 async def init_db():
-    async with aiosqlite.connect(config.DB_NAME) as db:
-        await db.execute("""
-            CREATE TABLE IF NOT EXISTS users (
-                user_id INTEGER PRIMARY KEY,
-                username TEXT,
-                joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
-        await db.commit()
+    """Инициализация базы данных и создание connection pool"""
+    global db_pool
+    try:
+        # Создаем connection pool
+        db_pool = await asyncpg.create_pool(
+            config.DATABASE_URL,
+            min_size=1,
+            max_size=10,
+            command_timeout=60
+        )
+        
+        # Создаем таблицу, если она не существует
+        async with db_pool.acquire() as conn:
+            await conn.execute("""
+                CREATE TABLE IF NOT EXISTS users (
+                    user_id BIGINT PRIMARY KEY,
+                    username TEXT,
+                    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+        
+        logging.info("✅ База данных PostgreSQL инициализирована")
+    except Exception as e:
+        logging.error(f"❌ Ошибка инициализации базы данных: {e}")
+        raise
+
+async def close_db():
+    """Закрытие connection pool"""
+    global db_pool
+    if db_pool:
+        await db_pool.close()
+        logging.info("База данных закрыта")
 
 async def add_user(user_id: int, username: str):
-    async with aiosqlite.connect(config.DB_NAME) as db:
-        await db.execute(
-            "INSERT OR IGNORE INTO users (user_id, username) VALUES (?, ?)",
-            (user_id, username)
-        )
-        await db.commit()
+    """Добавление пользователя в базу данных"""
+    if not db_pool:
+        logging.error("Connection pool не инициализирован")
+        return
+    
+    try:
+        async with db_pool.acquire() as conn:
+            await conn.execute(
+                "INSERT INTO users (user_id, username) VALUES ($1, $2) ON CONFLICT (user_id) DO NOTHING",
+                user_id, username or None
+            )
+    except Exception as e:
+        logging.error(f"Ошибка при добавлении пользователя: {e}")
 
 async def get_all_users():
-    async with aiosqlite.connect(config.DB_NAME) as db:
-        async with db.execute("SELECT user_id FROM users") as cursor:
-            return [row[0] for row in await cursor.fetchall()]
+    """Получение списка всех пользователей"""
+    if not db_pool:
+        logging.error("Connection pool не инициализирован")
+        return []
+    
+    try:
+        async with db_pool.acquire() as conn:
+            rows = await conn.fetch("SELECT user_id FROM users")
+            return [row['user_id'] for row in rows]
+    except Exception as e:
+        logging.error(f"Ошибка при получении списка пользователей: {e}")
+        return []
+
+async def get_user_info(user_id: int):
+    """Получение информации о конкретном пользователе"""
+    if not db_pool:
+        logging.error("Connection pool не инициализирован")
+        return None
+    
+    try:
+        async with db_pool.acquire() as conn:
+            row = await conn.fetchrow(
+                "SELECT user_id, username, joined_at FROM users WHERE user_id = $1",
+                user_id
+            )
+            return dict(row) if row else None
+    except Exception as e:
+        logging.error(f"Ошибка при получении информации о пользователе: {e}")
+        return None
+
+async def get_users_list(limit: int = 50, offset: int = 0):
+    """Получение списка пользователей с пагинацией"""
+    if not db_pool:
+        logging.error("Connection pool не инициализирован")
+        return []
+    
+    try:
+        async with db_pool.acquire() as conn:
+            rows = await conn.fetch(
+                "SELECT user_id, username, joined_at FROM users ORDER BY joined_at DESC LIMIT $1 OFFSET $2",
+                limit, offset
+            )
+            return [dict(row) for row in rows]
+    except Exception as e:
+        logging.error(f"Ошибка при получении списка пользователей: {e}")
+        return []
+
+async def get_users_count():
+    """Получение общего количества пользователей"""
+    if not db_pool:
+        logging.error("Connection pool не инициализирован")
+        return 0
+    
+    try:
+        async with db_pool.acquire() as conn:
+            count = await conn.fetchval("SELECT COUNT(*) FROM users")
+            return count or 0
+    except Exception as e:
+        logging.error(f"Ошибка при получении количества пользователей: {e}")
+        return 0
+
+async def get_recent_users(days: int = 7):
+    """Получение количества новых пользователей за последние N дней"""
+    if not db_pool:
+        logging.error("Connection pool не инициализирован")
+        return 0
+    
+    try:
+        async with db_pool.acquire() as conn:
+            count = await conn.fetchval(
+                "SELECT COUNT(*) FROM users WHERE joined_at >= NOW() - make_interval(days => $1)",
+                days
+            )
+            return count or 0
+    except Exception as e:
+        logging.error(f"Ошибка при получении новых пользователей: {e}")
+        return 0
+
+async def delete_user(user_id: int):
+    """Удаление пользователя из базы данных"""
+    if not db_pool:
+        logging.error("Connection pool не инициализирован")
+        return False
+    
+    try:
+        async with db_pool.acquire() as conn:
+            result = await conn.execute(
+                "DELETE FROM users WHERE user_id = $1",
+                user_id
+            )
+            return result == "DELETE 1"
+    except Exception as e:
+        logging.error(f"Ошибка при удалении пользователя: {e}")
+        return False
 
 # --- FSM STATES ---
 class CardGen(StatesGroup):
@@ -521,7 +647,7 @@ async def perform_generation(message: types.Message, state: FSMContext, user_tex
             f"Страна получателя: {tc.COUNTRIES[data['country']]}!\n"
             f"Нажмите /start, чтобы начать процесс заново.\n\n"
             f"---\n\n"
-            f"🪄 Эта открытка была создана с помощью @culture_card_bot"
+            f"🪄 Эта открытка была создана с помощью @celebrate_the_world_bot"
         )
         
         # Сохраняем страну для быстрого создания еще одной открытки
@@ -628,27 +754,291 @@ async def cancel_action(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
 # --- ADMIN & MAIN ---
+
+def is_admin(user_id: int) -> bool:
+    """Проверка, является ли пользователь администратором"""
+    return user_id == config.ADMIN_ID
+
+@dp.message(Command("admin"))
+async def cmd_admin(message: types.Message):
+    """Главное меню администратора"""
+    if not is_admin(message.from_user.id):
+        await message.answer("❌ У вас нет доступа к этой команде.")
+        return
+    
+    admin_menu = (
+        "🔐 **Панель администратора**\n\n"
+        "Доступные команды:\n\n"
+        "📊 `/stats` - Статистика пользователей\n"
+        "👥 `/users` - Выгрузка CSV файла со всеми пользователями\n"
+        "🔍 `/user_info <user_id>` - Информация о пользователе\n"
+        "🗑️ `/delete_user <user_id>` - Удалить пользователя\n"
+        "📢 `/broadcast <сообщение>` - Рассылка сообщений\n"
+        "💾 `/db_stats` - Статистика базы данных\n"
+        "❓ `/help_admin` - Показать это меню"
+    )
+    await message.answer(admin_menu, parse_mode="Markdown")
+
+@dp.message(Command("help_admin"))
+async def cmd_help_admin(message: types.Message):
+    """Справка по админским командам"""
+    await cmd_admin(message)
+
 @dp.message(Command("stats"))
 async def cmd_stats(message: types.Message):
-    if message.from_user.id == config.ADMIN_ID:
-        users = await get_all_users()
-        await message.answer(f"📊 Всего пользователей: {len(users)}")
+    """Расширенная статистика пользователей"""
+    if not is_admin(message.from_user.id):
+        await message.answer("❌ У вас нет доступа к этой команде.")
+        return
+    
+    try:
+        total_users = await get_users_count()
+        new_users_today = await get_recent_users(1)
+        new_users_week = await get_recent_users(7)
+        new_users_month = await get_recent_users(30)
+        
+        stats_text = (
+            f"📊 **Статистика пользователей**\n\n"
+            f"👥 Всего пользователей: {total_users}\n"
+            f"🆕 Новых сегодня: {new_users_today}\n"
+            f"📅 Новых за неделю: {new_users_week}\n"
+            f"📆 Новых за месяц: {new_users_month}"
+        )
+        await message.answer(stats_text, parse_mode="Markdown")
+    except Exception as e:
+        logging.error(f"Ошибка в cmd_stats: {e}")
+        await message.answer("❌ Ошибка при получении статистики.")
+
+@dp.message(Command("users"))
+async def cmd_users(message: types.Message):
+    """Выгрузка CSV файла со всеми пользователями"""
+    if not is_admin(message.from_user.id):
+        await message.answer("❌ У вас нет доступа к этой команде.")
+        return
+    
+    try:
+        # Получаем всех пользователей (без лимита)
+        if not db_pool:
+            await message.answer("❌ База данных не инициализирована.")
+            return
+        
+        async with db_pool.acquire() as conn:
+            rows = await conn.fetch(
+                "SELECT user_id, username, joined_at FROM users ORDER BY joined_at DESC"
+            )
+            users = [dict(row) for row in rows]
+        
+        total_users = len(users)
+        
+        if not users:
+            await message.answer("📋 Пользователи не найдены.")
+            return
+        
+        # Создаем CSV файл в памяти
+        csv_buffer = io.StringIO()
+        csv_writer = csv.writer(csv_buffer)
+        
+        # Записываем заголовки
+        csv_writer.writerow(['user_id', 'username', 'joined_at'])
+        
+        # Записываем данные
+        for user in users:
+            user_id = user['user_id']
+            username = user['username'] or ''
+            joined_at = user['joined_at'].strftime("%Y-%m-%d %H:%M:%S") if user['joined_at'] else ''
+            csv_writer.writerow([user_id, username, joined_at])
+        
+        # Конвертируем в bytes для отправки
+        csv_bytes = csv_buffer.getvalue().encode('utf-8-sig')  # utf-8-sig для правильного отображения в Excel
+        csv_buffer.close()
+        
+        # Создаем файл для отправки
+        input_file = BufferedInputFile(
+            csv_bytes,
+            filename=f"users_export_{total_users}.csv"
+        )
+        
+        await message.answer(
+            f"📊 **Выгрузка пользователей**\n\n"
+            f"✅ Всего пользователей: {total_users}\n"
+            f"📁 Файл готов к скачиванию",
+            parse_mode="Markdown"
+        )
+        await bot.send_document(
+            chat_id=message.chat.id,
+            document=input_file,
+            caption=f"📋 Список всех пользователей ({total_users} записей)"
+        )
+    except Exception as e:
+        logging.error(f"Ошибка в cmd_users: {e}", exc_info=True)
+        await message.answer("❌ Ошибка при выгрузке списка пользователей.")
+
+@dp.message(Command("user_info"))
+async def cmd_user_info(message: types.Message):
+    """Информация о конкретном пользователе"""
+    if not is_admin(message.from_user.id):
+        await message.answer("❌ У вас нет доступа к этой команде.")
+        return
+    
+    try:
+        parts = message.text.split()
+        if len(parts) < 2:
+            await message.answer("❌ Использование: `/user_info <user_id>`", parse_mode="Markdown")
+            return
+        
+        user_id = int(parts[1])
+        user_info = await get_user_info(user_id)
+        
+        if not user_info:
+            await message.answer(f"❌ Пользователь с ID `{user_id}` не найден.", parse_mode="Markdown")
+            return
+        
+        username = user_info['username'] or "не указан"
+        joined_at = user_info['joined_at'].strftime("%d.%m.%Y %H:%M:%S") if user_info['joined_at'] else "неизвестно"
+        
+        info_text = (
+            f"👤 **Информация о пользователе**\n\n"
+            f"🆔 ID: `{user_info['user_id']}`\n"
+            f"👤 Username: @{username}\n"
+            f"📅 Дата регистрации: {joined_at}"
+        )
+        await message.answer(info_text, parse_mode="Markdown")
+    except ValueError:
+        await message.answer("❌ Неверный формат user_id. Используйте число.")
+    except Exception as e:
+        logging.error(f"Ошибка в cmd_user_info: {e}")
+        await message.answer("❌ Ошибка при получении информации о пользователе.")
+
+@dp.message(Command("delete_user"))
+async def cmd_delete_user(message: types.Message):
+    """Удаление пользователя из базы данных"""
+    if not is_admin(message.from_user.id):
+        await message.answer("❌ У вас нет доступа к этой команде.")
+        return
+    
+    try:
+        parts = message.text.split()
+        if len(parts) < 2:
+            await message.answer("❌ Использование: `/delete_user <user_id>`", parse_mode="Markdown")
+            return
+        
+        user_id = int(parts[1])
+        
+        # Проверяем, существует ли пользователь
+        user_info = await get_user_info(user_id)
+        if not user_info:
+            await message.answer(f"❌ Пользователь с ID `{user_id}` не найден.", parse_mode="Markdown")
+            return
+        
+        # Удаляем пользователя
+        success = await delete_user(user_id)
+        
+        if success:
+            username = user_info['username'] or "без username"
+            await message.answer(
+                f"✅ Пользователь удален:\n"
+                f"🆔 ID: `{user_id}`\n"
+                f"👤 @{username}",
+                parse_mode="Markdown"
+            )
+        else:
+            await message.answer("❌ Ошибка при удалении пользователя.")
+    except ValueError:
+        await message.answer("❌ Неверный формат user_id. Используйте число.")
+    except Exception as e:
+        logging.error(f"Ошибка в cmd_delete_user: {e}")
+        await message.answer("❌ Ошибка при удалении пользователя.")
+
+@dp.message(Command("db_stats"))
+async def cmd_db_stats(message: types.Message):
+    """Статистика базы данных"""
+    if not is_admin(message.from_user.id):
+        await message.answer("❌ У вас нет доступа к этой команде.")
+        return
+    
+    try:
+        total_users = await get_users_count()
+        new_users_today = await get_recent_users(1)
+        new_users_week = await get_recent_users(7)
+        new_users_month = await get_recent_users(30)
+        
+        # Получаем информацию о самой старой и новой регистрации
+        if db_pool:
+            async with db_pool.acquire() as conn:
+                oldest_user = await conn.fetchrow(
+                    "SELECT user_id, username, joined_at FROM users ORDER BY joined_at ASC LIMIT 1"
+                )
+                newest_user = await conn.fetchrow(
+                    "SELECT user_id, username, joined_at FROM users ORDER BY joined_at DESC LIMIT 1"
+                )
+        else:
+            oldest_user = None
+            newest_user = None
+        
+        stats_text = (
+            f"💾 **Статистика базы данных**\n\n"
+            f"👥 Всего пользователей: {total_users}\n\n"
+            f"📈 **Новые регистрации:**\n"
+            f"   Сегодня: {new_users_today}\n"
+            f"   За неделю: {new_users_week}\n"
+            f"   За месяц: {new_users_month}\n\n"
+        )
+        
+        if oldest_user and newest_user:
+            oldest_date = oldest_user['joined_at'].strftime("%d.%m.%Y") if oldest_user['joined_at'] else "неизвестно"
+            newest_date = newest_user['joined_at'].strftime("%d.%m.%Y") if newest_user['joined_at'] else "неизвестно"
+            stats_text += (
+                f"📅 **Период:**\n"
+                f"   Первая регистрация: {oldest_date}\n"
+                f"   Последняя регистрация: {newest_date}"
+            )
+        
+        await message.answer(stats_text, parse_mode="Markdown")
+    except Exception as e:
+        logging.error(f"Ошибка в cmd_db_stats: {e}")
+        await message.answer("❌ Ошибка при получении статистики базы данных.")
 
 @dp.message(Command("broadcast"))
 async def cmd_broadcast(message: types.Message):
-    if message.from_user.id == config.ADMIN_ID:
-        parts = message.text.split(maxsplit=1)
-        if len(parts) > 1:
-            users = await get_all_users()
-            msg = await message.answer("Начинаю рассылку...")
-            count = 0
-            for uid in users:
-                try:
-                    await bot.send_message(uid, parts[1])
-                    count += 1
-                    await asyncio.sleep(0.05)
-                except: pass
-            await msg.edit_text(f"✅ Рассылка завершена. Отправлено {count} пользователям.")
+    """Рассылка сообщений всем пользователям"""
+    if not is_admin(message.from_user.id):
+        await message.answer("❌ У вас нет доступа к этой команде.")
+        return
+    
+    parts = message.text.split(maxsplit=1)
+    if len(parts) < 2:
+        await message.answer(
+            "❌ Использование: `/broadcast <сообщение>`\n\n"
+            "Пример: `/broadcast Привет всем! Это тестовая рассылка.`",
+            parse_mode="Markdown"
+        )
+        return
+    
+    users = await get_all_users()
+    if not users:
+        await message.answer("❌ Нет пользователей для рассылки.")
+        return
+    
+    msg = await message.answer(f"📢 Начинаю рассылку для {len(users)} пользователей...")
+    count = 0
+    failed = 0
+    
+    for uid in users:
+        try:
+            await bot.send_message(uid, parts[1])
+            count += 1
+            await asyncio.sleep(0.05)  # Задержка, чтобы не превысить лимиты Telegram
+        except Exception as e:
+            failed += 1
+            logging.warning(f"Не удалось отправить сообщение пользователю {uid}: {e}")
+    
+    await msg.edit_text(
+        f"✅ **Рассылка завершена**\n\n"
+        f"✅ Успешно: {count}\n"
+        f"❌ Ошибок: {failed}\n"
+        f"📊 Всего: {len(users)}",
+        parse_mode="Markdown"
+    )
 
 async def main():
     """Основная функция запуска бота"""
@@ -664,6 +1054,10 @@ async def main():
         raise
     finally:
         logging.info("Завершаю работу бота...")
+        try:
+            await close_db()
+        except Exception as e:
+            logging.error(f"Ошибка при закрытии базы данных: {e}")
         try:
             await bot.session.close()
         except Exception as e:

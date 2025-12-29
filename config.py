@@ -32,4 +32,16 @@ except ValueError:
         "Установите переменную окружения ADMIN_ID с вашим Telegram User ID"
     )
 
-DB_NAME = "bot_data.db"
+# PostgreSQL database URL
+# Формат: postgresql://username:password@host:port/database
+# На Render будет автоматически предоставлена переменная DATABASE_URL
+# Render использует postgres://, но asyncpg требует postgresql://
+raw_database_url = os.getenv("DATABASE_URL")
+if not raw_database_url:
+    raise ValueError(
+        "DATABASE_URL не установлен! Установите переменную окружения DATABASE_URL.\n"
+        "Для локальной разработки создайте файл .env с DATABASE_URL=postgresql://user:password@localhost:5432/dbname"
+    )
+
+# Конвертируем postgres:// в postgresql:// для asyncpg (Render использует postgres://)
+DATABASE_URL = raw_database_url.replace("postgres://", "postgresql://", 1) if raw_database_url.startswith("postgres://") else raw_database_url
