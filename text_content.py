@@ -288,8 +288,8 @@ def get_available_topics(country: str):
         # Для Филиппин: fruit_burst, light_abstract
         return ["fruit_burst", "light_abstract"]
     else:
-        # Для UAE и KSA: time, fireworks, falcon
-        return ["time", "fireworks", "falcon"]
+        # Для UAE и KSA: time, fireworks
+        return ["time", "fireworks"]
 
 def build_final_prompt(country_code, topic_code):
     """Сборка финального промпта для AI"""
